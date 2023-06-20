@@ -70,12 +70,13 @@ def recompose_nurbs_handles(params):
     ], axis=-1)
     skeleton = np.concatenate([params['skeleton_root'], skeleton_offs], axis=0)
     skeleton = np.cumsum(skeleton, axis=0)
-    
-    handles = lofting.compute_profile_verts(
-        skeleton, params['ts'], 
-        params['profiles_norm'] * params['rads'], profile_as_points=True)
 
-    return handles
+    return lofting.compute_profile_verts(
+        skeleton,
+        params['ts'],
+        params['profiles_norm'] * params['rads'],
+        profile_as_points=True,
+    )
 
 class NurbsPart(PartFactory):
 

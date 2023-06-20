@@ -61,10 +61,7 @@ def assign_material(obj, m=None, prefix='', m_idx=0, slot_idx=0):
     bpy.ops.object.material_slot_add()
   obj.active_material_index = slot_idx
 
-  if m is not None:
-    obj.active_material = m
-  else:
-    obj.active_material = get_materials(prefix)[m_idx]
+  obj.active_material = m if m is not None else get_materials(prefix)[m_idx]
 
 
 def uv_smart_project(obj):
@@ -188,7 +185,7 @@ def setup_material(m, txt_paths, metal_prob=.2, transm_prob=.2, emit_prob=0):
   # Load any images that haven't been loaded already
   img_ref = [tpath.split('/')[-1] for tpath in txt_paths]
   for img_idx, img in enumerate(img_ref):
-    if not img in D.images:
+    if img not in D.images:
       try:
         D.images.load(txt_paths[img_idx])
       except:

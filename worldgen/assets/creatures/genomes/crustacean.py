@@ -148,7 +148,10 @@ def shader_eye(nw: NodeWrangler):
 
 def crustacean_postprocessing(body_parts, extras, params):
     tag_list = ['body', 'claw', 'leg']
-    materials = [shaderfunc_to_material(shader_crustacean, params['material']) for _, t in enumerate(tag_list)]
+    materials = [
+        shaderfunc_to_material(shader_crustacean, params['material'])
+        for _ in tag_list
+    ]
     tag_list.append('eye')
     materials.append(shaderfunc_to_material(shader_eye))
     assign_material(body_parts + extras, materials)

@@ -29,21 +29,67 @@ IGNORE_REROUTES = True
 COMMON_ATTR_NAMES = ['data_type', 'mode', 'operation']
 VALUE_NODES = [Nodes.Value, Nodes.Vector, Nodes.RGB, Nodes.InputColor, Nodes.Integer]
 
-UNIVERSAL_ATTR_NAMES = set([
-    'show_preview', '__module__', 'is_registered_node_type', 'bl_rna', 'poll', 'name', 
-    'internal_links', 'dimensions', 'parent', 'bl_width_max', 'label', 'input_template', 
-    'show_texture', 'rna_type', 'width_hidden', 'show_options', 'location', 'outputs', 
-    'use_custom_color', '__doc__', 'width', 'bl_width_default', 'inputs', 'bl_idname', 
-    'socket_value_update', 'bl_width_min', 'color', 'bl_height_max', '__slots__', 'select', 
-    'mute', 'bl_height_default', 'bl_static_type', 'bl_height_min', 'height', 'bl_label', 
-    'bl_icon', 'hide', 'output_template', 'poll_instance', 'draw_buttons_ext', 'type', 
-    'bl_description', 'draw_buttons', 'update'
-])
+UNIVERSAL_ATTR_NAMES = {
+    'show_preview',
+    '__module__',
+    'is_registered_node_type',
+    'bl_rna',
+    'poll',
+    'name',
+    'internal_links',
+    'dimensions',
+    'parent',
+    'bl_width_max',
+    'label',
+    'input_template',
+    'show_texture',
+    'rna_type',
+    'width_hidden',
+    'show_options',
+    'location',
+    'outputs',
+    'use_custom_color',
+    '__doc__',
+    'width',
+    'bl_width_default',
+    'inputs',
+    'bl_idname',
+    'socket_value_update',
+    'bl_width_min',
+    'color',
+    'bl_height_max',
+    '__slots__',
+    'select',
+    'mute',
+    'bl_height_default',
+    'bl_static_type',
+    'bl_height_min',
+    'height',
+    'bl_label',
+    'bl_icon',
+    'hide',
+    'output_template',
+    'poll_instance',
+    'draw_buttons_ext',
+    'type',
+    'bl_description',
+    'draw_buttons',
+    'update',
+}
 
-SPECIAL_CASE_ATTR_NAMES = set([
-    'color_ramp', 'mapping', 'vector', 'color', 'integer', 'texture_mapping', 'color_mapping',
-    'image_user', 'interface', 'node_tree', 'tag_need_exec'
-])
+SPECIAL_CASE_ATTR_NAMES = {
+    'color_ramp',
+    'mapping',
+    'vector',
+    'color',
+    'integer',
+    'texture_mapping',
+    'color_mapping',
+    'image_user',
+    'interface',
+    'node_tree',
+    'tag_need_exec',
+}
 
 def node_attrs_available(node):
     attrs = set(node.__dir__())
@@ -68,7 +114,7 @@ def prefix(dependencies_used) -> str:
     )
 
     deps_table = [(ng_name, name_used[0]) for ng_name, name_used in dependencies_used.items() if name_used[1]]
-    module_names = set(d[1] for d in deps_table)
+    module_names = {d[1] for d in deps_table}
     deps_by_module = {n: [d[0] for d in deps_table if d[1] == n] for n in module_names}
     deps_prefix_lines = [f"from {name} import {', '.join(ngnames)}" for name, ngnames in deps_by_module.items()]
 
@@ -125,12 +171,11 @@ def represent_default_value(val, simple=True):
 
     assert isinstance(code, str)
 
-    if simple:
-        if len(new_transpiler_targets) != 0:
-            raise ValueError(f'Encountered {val=} while trying to represent_default_value with simple=True, please contact the developer')
-        return code
-    else:
+    if not simple:
         return code, new_transpiler_targets
+    if new_transpiler_targets:
+        raise ValueError(f'Encountered {val=} while trying to represent_default_value with simple=True, please contact the developer')
+    return code
 
 def has_default_value_changed(node_tree, node, value):
 
@@ -202,7 +247,7 @@ def special_case_curve(node, varname):
     for i, c in enumerate(node.mapping.curves):
         points = [tuple(p.location) for p in c.points]
         args = [f'{varname}.mapping.curves[{i}]', represent_list(points)]
-        if not all(p.handle_type == 'AUTO' for p in c.points):
+        if any(p.handle_type != 'AUTO' for p in c.points):
             args.append(f'handles={repr([p.handle_type for p in c.points])}')
         code += f"node_utils.assign_curve({', '.join(args)})\n"
     return code
@@ -273,7 +318,7 @@ def represent_label_value_expression(expression):
     args = parse_args(args.strip(')'))
 
     if op in ['N', 'normal', 'U', 'uniform', 'R', 'randint']:
-        if not len(args) == 2:
+        if len(args) != 2:
             raise ValueError(f'In {expression=}, expected 2 arguments, got {len(args)} instead')
         funcname = {
             'N': 'normal', 'normal': 'normal',
@@ -284,7 +329,7 @@ def represent_label_value_expression(expression):
         return f'{funcname}({args})'
 
     elif op in ['color', 'color_category']:
-        if not len(args) == 1:
+        if len(args) != 1:
             raise ValueError(f'In {expression=}, expected 1 argument, got {len(args)} instead')
         return f'color_category({repr(args[0])})'
     else:
@@ -328,7 +373,7 @@ def special_case_value(node, varname):
 
 def get_connected_link(node_tree, input_socket):
     links = [l for l in node_tree.links if l.to_socket == input_socket]
-    return None if len(links) == 0 else links
+    return None if not links else links
 
 def create_attrs_dict(node_tree, node):
 
@@ -344,7 +389,7 @@ def create_attrs_dict(node_tree, node):
     print(node.name, attr_names)
 
     for a in COMMON_ATTR_NAMES:
-        if hasattr(node, a) and not a in attr_names:
+        if hasattr(node, a) and a not in attr_names:
             raise ValueError(f'{node.bl_idname=} has attr {repr(a)} but it is not listed in node_info.NODE_ATTRS_AVAILABLE, please add it to avoid incorrect behavior')
 
     # Check that the dict is correct / doesnt contain typos
@@ -373,7 +418,7 @@ def create_inputs_dict(node_tree, node, memo):
     def update_inputs(i, k, v):
         is_input_name_unique = ([socket.name for socket in node.inputs].count(k) == 1)
         k = repr(k) if is_input_name_unique else i
-        if not k in inputs_dict:
+        if k not in inputs_dict:
             inputs_dict[k] = v
         else:
             if not isinstance(inputs_dict[k], list):
@@ -432,13 +477,13 @@ def repr_iter_val(v):
 
 def represent_list(inputs, spacing=' '):
     inputs = [repr_iter_val(x) for x in inputs]
-    return '[' + f",{spacing}".join(inputs) + ']'
+    return f'[{f",{spacing}".join(inputs)}]'
 
 def represent_tuple(inputs, spacing=' '):
     inputs = [repr_iter_val(x) for x in inputs]
     for x in inputs:
         assert isinstance(x, str), x
-    return '(' + f",{spacing}".join(inputs) + ')' 
+    return f'({f",{spacing}".join(inputs)})' 
 
 def represent_dict(inputs_dict, spacing=' '):
     vals = f',{spacing}'.join(f"{k}: {repr_iter_val(v)}"
@@ -467,14 +512,14 @@ def get_varname(node, taken):
 
         if len(rest) > 0:
             assert len(rest) == 1
-            name += '_' + str(int(rest[0]))
+            name += f'_{int(rest[0])}'
 
     name = re.sub('[^0-9a-zA-Z_]+', '_', name)
     name = re.sub('_+', '_', name)
     name = name.strip('_')
 
     if keyword.iskeyword(name):
-        name = 'op_' + name
+        name = f'op_{name}'
 
     if name in taken:
         i = 1
@@ -512,7 +557,7 @@ def create_node(node_tree, node, memo):
 
     if node.name in memo:
         return memo[node.name], "", {}
-    
+
     idname = node.bl_idname
     if idname in SINGLETON_NODES:
         for n in memo:
@@ -526,8 +571,6 @@ def create_node(node_tree, node, memo):
     code = ""
     new_transpile_targets = {}
 
-    new_node_args = []
-
     if node.bl_idname.endswith('NodeGroup'):
         # node group will be transpiled to a function, then the funcname will be mapped to the nodegroup name by a decorator
         funcname = get_func_name(node)
@@ -535,11 +578,10 @@ def create_node(node_tree, node, memo):
         nodetype_expr = f'{funcname}().name'
     else:
         nodetype_expr = get_nodetype_expression(node)
-    new_node_args.append(nodetype_expr)
-
+    new_node_args = [nodetype_expr]
     # Add code to connect up any input nodes
     inputs_dict, inputs_code, targets = create_inputs_dict(node_tree, node, memo)
-    new_transpile_targets.update(targets)
+    new_transpile_targets |= targets
     code += inputs_code
     if len(inputs_dict) > 0:
         new_node_args.append(f'input_kwargs={represent_dict(inputs_dict)}')
@@ -663,7 +705,11 @@ def transpile(orig_targets, module_dependencies=[]):
     available_dependencies = {}
     for module_name in module_dependencies:
         module = importlib.import_module(module_name)
-        available_dependencies.update({k: [module_name, False] for k in dir(module) if k.startswith('nodegroup_')})
+        available_dependencies |= {
+            k: [module_name, False]
+            for k in dir(module)
+            if k.startswith('nodegroup_')
+        }
     print(f'{available_dependencies.keys()=}')
 
     while any(not v[1] for v in targets.values()):
@@ -727,6 +773,4 @@ def transpile_world(module_dependencies=[], compositing=True, worldshader=True):
 
     funccode, funcnames, dependencies_used = transpile(targets, module_dependencies)
 
-    code = prefix(dependencies_used) + '\n\n' + funccode
-
-    return code
+    return prefix(dependencies_used) + '\n\n' + funccode

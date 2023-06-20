@@ -37,9 +37,9 @@ class DiffGrowthBaseCoralFactory(BaseCoralFactory):
     @staticmethod
     def diff_growth_make(name, n_colonies=1, **kwargs):
         n_base = 4
-        stride = 2
         if n_colonies > 1:
             angles = polygon_angles(np.random.randint(2, 6))
+            stride = 2
             colony_offsets = np.stack([np.cos(angles), np.sin(angles), np.zeros_like(angles)]).T * stride
         else:
             colony_offsets = np.zeros((1, 3))
@@ -72,10 +72,15 @@ class DiffGrowthBaseCoralFactory(BaseCoralFactory):
         n_colonies = np.random.randint(2, 3) if uniform() < prob_multiple_colonies else 1
         growth_vec = 0, 0, uniform(.8, 1.2)
         growth_scale = 1, 1, uniform(.5, .7)
-        obj = DiffGrowthBaseCoralFactory.diff_growth_make('leather_coral', n_colonies,
-                                                          max_polygons=1e3 * n_colonies, fac_noise=2., dt=.25,
-                                                          growth_scale=growth_scale, growth_vec=growth_vec)
-        return obj
+        return DiffGrowthBaseCoralFactory.diff_growth_make(
+            'leather_coral',
+            n_colonies,
+            max_polygons=1e3 * n_colonies,
+            fac_noise=2.0,
+            dt=0.25,
+            growth_scale=growth_scale,
+            growth_vec=growth_vec,
+        )
 
     @staticmethod
     def flat_make():

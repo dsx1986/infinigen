@@ -89,11 +89,7 @@ class CoralFactory(AssetFactory):
 
     @staticmethod
     def build_base_hue():
-        if uniform(0, 1) < .25:
-            base_hue = uniform(0, 1)
-        else:
-            base_hue = uniform(-.2, .3) % 1
-        return base_hue
+        return uniform(0, 1) if uniform(0, 1) < .25 else uniform(-.2, .3) % 1
 
     @staticmethod
     def shader_coral(nw: NodeWrangler, base_hue):

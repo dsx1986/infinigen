@@ -53,10 +53,15 @@ def wind_rotation(nw, speed=1.0, direction=None, scale=1.0, strength=30):
     deg2rad = nw.new_node(Nodes.Math,
         input_kwargs={0: add_1, 1: 0.0175},
         attrs={'operation': 'MULTIPLY'})
-    rotation = nw.new_node(Nodes.RotateEuler,
-        input_kwargs={'Rotation': Vector((0,0,0)), 'Axis': vector_rotate_1, 'Angle': deg2rad},
-        attrs={'type': 'AXIS_ANGLE'})
-    return rotation
+    return nw.new_node(
+        Nodes.RotateEuler,
+        input_kwargs={
+            'Rotation': Vector((0, 0, 0)),
+            'Axis': vector_rotate_1,
+            'Angle': deg2rad,
+        },
+        attrs={'type': 'AXIS_ANGLE'},
+    )
 
 def wind(*args, **kwargs):
     return lambda nw: wind_rotation(nw, *args, **kwargs)

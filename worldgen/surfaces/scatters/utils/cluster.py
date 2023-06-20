@@ -39,13 +39,19 @@ def instance_rotation(nw: NodeWrangler, normal, delta_normal=.1, z_rotation='mus
         z_rotation = nw.uniform(0, 2 * np.pi)
     else:
         z_rotation = uniform(0, 2 * np.pi)
-    rotation = nw.new_node(Nodes.RotateEuler, input_kwargs={
-        'Rotation': nw.new_node(Nodes.AlignEulerToVector, input_kwargs={'Vector': perturbed_normal},
-                                attrs={'axis': 'Z'}),
-        'Axis': perturbed_normal,
-        'Angle': z_rotation
-    }, attrs={'type': 'AXIS_ANGLE'})
-    return rotation
+    return nw.new_node(
+        Nodes.RotateEuler,
+        input_kwargs={
+            'Rotation': nw.new_node(
+                Nodes.AlignEulerToVector,
+                input_kwargs={'Vector': perturbed_normal},
+                attrs={'axis': 'Z'},
+            ),
+            'Axis': perturbed_normal,
+            'Angle': z_rotation,
+        },
+        attrs={'type': 'AXIS_ANGLE'},
+    )
 
 
 def cluster_scatter(nw: NodeWrangler, base_obj, collection, density, instance_index=None, radius=.02,

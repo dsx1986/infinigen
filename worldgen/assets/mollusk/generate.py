@@ -58,10 +58,7 @@ class MolluskFactory(AssetFactory):
 
     @staticmethod
     def build_base_hue():
-        if uniform(0, 1) < .4:
-            return uniform(0, .2)
-        else:
-            return uniform(.05, .12)
+        return uniform(0, .2) if uniform(0, 1) < .4 else uniform(.05, .12)
 
     @staticmethod
     def shader_mollusk(nw: NodeWrangler, base_hue, ratio=0, x_scale=2, z_scale=1, distortion=5):

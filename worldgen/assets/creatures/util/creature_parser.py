@@ -48,11 +48,10 @@ def parse_part(nurbs_part, mesh_part, profiles_folder):
     
     name = basename(nurbs_part)
 
-    part_genome_kwargs = {}
     handles = parse_nurbs_data(nurbs_part)
     skeleton, ts, rads, profiles_norm = lofting.factorize_nurbs_handles(handles[..., :-1])
 
-    part_genome_kwargs['skeleton'] = repr_np_array(skeleton)
+    part_genome_kwargs = {'skeleton': repr_np_array(skeleton)}
     part_genome_kwargs['rads'] = repr_np_array(rads.reshape(-1))
 
     path = Path(profiles_folder)/f'profile_{name}.npy'
@@ -61,7 +60,7 @@ def parse_part(nurbs_part, mesh_part, profiles_folder):
     part_genome_kwargs['profile'] = f'np.load({repr(str(path))})'
 
     body = f"return {repr_function_call('PartGenome', part_genome_kwargs)}"
-    code = f'def {name}():\n' + indent(body)
+    code = f'def {name}():\n{indent(body)}'
     return name, code
 
 def find_approx_uvr_coord(child, parent_mesh, parent_nurbs):

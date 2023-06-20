@@ -452,10 +452,7 @@ def shader_bird_claw(nw: NodeWrangler, rand=True, **input_kwargs):
 
 def apply(objs, shader_kwargs={}, **kwargs):
     x = random.random()
-    if x < 0.4:
-        kind = 'eagle'
-    else:
-        kind = 'duck'
+    kind = 'eagle' if x < 0.4 else 'duck'
     shader_kwargs['kind'] = kind
     for obj in objs:
         if "Tail" in obj.name:

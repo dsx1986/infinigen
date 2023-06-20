@@ -25,7 +25,7 @@ from nodes import node_info
 def remove_materials(obj):
     with butil.SelectObjects(obj):
         obj.active_material_index = 0
-        for i in range(len(obj.material_slots)):
+        for _ in range(len(obj.material_slots)):
             bpy.ops.object.material_slot_remove({'object': obj})
 
 
@@ -225,10 +225,7 @@ def add_material(objs, shader_func, selection=None, input_args=None, input_kwarg
         new_attribute_node = nw.new_node(Nodes.Attribute, [], {"attribute_name": selection})
         if "Attribute Sum" in material.node_tree.nodes:
             old_attribute_sum_node = material.node_tree.nodes["Attribute Sum"]
-            if old_attribute_sum_node.type == "ATTRIBUTE":
-                socket_index_old = 2
-            else:
-                socket_index_old = 0
+            socket_index_old = 2 if old_attribute_sum_node.type == "ATTRIBUTE" else 0
             new_attribute_sum_node = nw.scalar_add((old_attribute_sum_node, socket_index_old), (new_attribute_node, 2))
             old_attribute_sum_node.name = "Attribute Sum Old"
             new_attribute_sum_node.name = "Attribute Sum"
@@ -239,10 +236,7 @@ def add_material(objs, shader_func, selection=None, input_args=None, input_kwarg
         links_to_output = [link for link in nw.links if (link.to_node.bl_idname == Nodes.MaterialOutput)]
         assert len(links_to_output) == 1, links_to_output
         penultimate_node = links_to_output.pop().from_node
-        if new_attribute_sum_node.type == "ATTRIBUTE":
-            socket_index_new = 2
-        else:
-            socket_index_new = 0
+        socket_index_new = 2 if new_attribute_sum_node.type == "ATTRIBUTE" else 0
         selection_weight = nw.divide2(
             (new_attribute_node, 2),
             (new_attribute_sum_node, socket_index_new)
@@ -309,7 +303,7 @@ def add_geomod(objs, geo_func,
                 mod.node_group = bpy.data.node_groups[name]
             else:
                 # print("input_kwargs", input_kwargs, geo_func.__name__)
-                if mod.node_group == None:
+                if mod.node_group is None:
                     group = geometry_node_group_empty_new()
                     mod.node_group = group
                 nw = NodeWrangler(mod)
@@ -327,13 +321,13 @@ def add_geomod(objs, geo_func,
         for id, att_name in zip(identifiers, attributes):
             # attributes are a 1-indexed list, and Geometry is the first element, so we start from 2
             # while f'Output_{i}_attribute_name' not in
-            mod[id + '_attribute_name'] = att_name
+            mod[f'{id}_attribute_name'] = att_name
         os = [outputs[i] for i in range(len(outputs)) if outputs[i].type != 'GEOMETRY']
         for o, domain in zip(os, domains):
             o.attribute_domain = domain
 
         inputs = mod.node_group.inputs
-        if not any(att_name is None for att_name in input_attributes):
+        if all(att_name is not None for att_name in input_attributes):
             raise Exception('None should be provided for Geometry inputs.')
         for i, att_name in zip(inputs, input_attributes):
             id = i.identifier
@@ -364,11 +358,11 @@ class Registry:
     def get_surface(name):
         if name == '':
             return NoApply
-        
+
         prefixes = ['surfaces.templates', 'surfaces.scatters']
         for prefix in prefixes:
             try:
-                return importlib.import_module(prefix + '.' + name)
+                return importlib.import_module(f'{prefix}.{name}')
             except ModuleNotFoundError:
                 continue
 
@@ -393,11 +387,10 @@ class Registry:
     def __call__(self, category_key):
         if self._registry is None:
             raise ValueError(
-                f'Surface registry has not been initialized! Have you loaded gin and called .initialize()?'
-                'Note, this step cannot happen at module initialization time, as gin is not yet loaded'
+                'Surface registry has not been initialized! Have you loaded gin and called .initialize()?Note, this step cannot happen at module initialization time, as gin is not yet loaded'
             )
 
-        if not category_key in self._registry:
+        if category_key not in self._registry:
             raise KeyError(
                 f'registry recieved request with {category_key=}, but no gin_config for this key was provided. {self._registry.keys()=}')
 

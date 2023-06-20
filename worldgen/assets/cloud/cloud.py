@@ -229,8 +229,7 @@ class Cumulonimbus(Cumulus):
         scale_x = np.random.uniform(512.0, 1024.0)
         scale_y = np.random.uniform(0.5, 2.0) * scale_x
         scale_z = np.random.uniform(256.0, 512.0)
-        scales = [scale_x, scale_y, scale_z]
-        return scales
+        return [scale_x, scale_y, scale_z]
 
     def update_shader_params(self, shader_params):
         shader_params.update({'density': np.random.uniform(0.1, 0.3), })

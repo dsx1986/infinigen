@@ -14,7 +14,7 @@ D = bpy.data
 
 
 def set_active_obj(obj):
-  if not C.active_object == obj:
+  if C.active_object != obj:
     try:
       bpy.ops.object.mode_set(mode='OBJECT')
     except:
@@ -66,11 +66,7 @@ def config_rendering(resolution=(480, 640), renderer='cycles', render_samples=64
 
 
 def create_collection(name, objs):
-  c_names = []
-  for c_idx, c in enumerate(D.collections):
-    if c_idx > 0:
-      c_names += [c.name]
-
+  c_names = [c.name for c_idx, c in enumerate(D.collections) if c_idx > 0]
   name_ = name
   count = 1
   while name_ in c_names:
@@ -138,11 +134,7 @@ def hide_collection(collection):
 
 
 def clear_collections():
-  c_names = []
-  for c_idx, c in enumerate(D.collections):
-    if c_idx > 0:
-      c_names += [c.name]
-
+  c_names = [c.name for c_idx, c in enumerate(D.collections) if c_idx > 0]
   for c_name in c_names:
     remove_collection(c_name)
 
@@ -184,14 +176,14 @@ def reset_scene(add_camera=False, clear_materials=False, obj_to_keep_list=[]):
 
     camera_pitch = np.pi * 0.5
     camera_height = 3
-    
+
     bpy.ops.object.camera_add(location=(0, -6, camera_height), rotation=(camera_pitch, 0, 0))
     cam = D.objects[0]
     C.scene.camera = cam
     cam.data.lens = 20
 
   if clear_materials: # Regardless of number of users
-    for m_idx in range(len(D.materials)):
+    for _ in range(len(D.materials)):
       D.materials.remove(D.materials[-1])
 
 

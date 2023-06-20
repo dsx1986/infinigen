@@ -27,10 +27,7 @@ class TussockMonocotFactory(MonocotGrowthFactory):
 
     @staticmethod
     def build_base_hue():
-        if uniform(0, 1) < .5:
-            return uniform(.1, .15)
-        else:
-            return uniform(.25, .35)
+        return uniform(.1, .15) if uniform(0, 1) < .5 else uniform(.25, .35)
 
     def build_leaf(self, face_size):
         x_anchors = np.array([0, uniform(.3, .7), 1.])

@@ -19,7 +19,7 @@ from surfaces import surface
 def apply(obj, scale=0.4, density=1., n=10, selection=None):
     with CountInstance('mollusk'):
         n_species = np.random.randint(4, 6)
-        factories = list(MolluskFactory(np.random.randint(1e5)) for _ in range(n_species))
+        factories = [MolluskFactory(np.random.randint(1e5)) for _ in range(n_species)]
         mollusk = make_asset_collection(factories, name='mollusk',
                                                     weights=np.random.uniform(0.5, 1, len(factories)), n=n,
                                                     verbose=True)

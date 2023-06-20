@@ -675,7 +675,7 @@ class LeafFactoryBroadleaf(AssetFactory):
                 hsvcol_vein = np.copy(hsvcol_blade)
                 hsvcol_vein[2] = 0.7
 
-            elif season=='summer' or season=='spring':
+            elif season in ['summer', 'spring']:
                 hsvcol_blade = [uniform(0.28, 0.32), uniform(0.6, 0.7), 0.9]
                 hsvcol_vein = np.copy(hsvcol_blade)
                 hsvcol_blade[2] = uniform(0.1, 0.5)

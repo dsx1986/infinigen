@@ -18,15 +18,15 @@ import random
 def shader_bark(nw, rand=False, **input_kwargs):
 
     texture_coordinate = nw.new_node(Nodes.TextureCoord)
-    
+
     mapping = nw.new_node(Nodes.Mapping,
         input_kwargs={'Vector': texture_coordinate.outputs["Object"]})
-    
+
     noise_texture = nw.new_node(Nodes.NoiseTexture,
         input_kwargs={'Vector': mapping, 'Detail': 16.0, 'Roughness': 0.62})
     if rand:
-        sample_max = input_kwargs['noise_scale_max'] if 'noise_scale_max' in input_kwargs else 3
-        sample_min = input_kwargs['noise_scale_min'] if 'noise_scale_min' in input_kwargs else 1/sample_max
+        sample_max = input_kwargs.get('noise_scale_max', 3)
+        sample_min = input_kwargs.get('noise_scale_min', 1/sample_max)
         noise_texture.inputs["Scale"].default_value = sample_ratio(noise_texture.inputs["Scale"].default_value, sample_min, sample_max)
 
     colorramp_1 = nw.new_node(Nodes.ColorRamp,
@@ -38,11 +38,11 @@ def shader_bark(nw, rand=False, **input_kwargs):
 
     attribute = nw.new_node(Nodes.Attribute,
         attrs={'attribute_name': 'offset'})
-    
+
     mix = nw.new_node(Nodes.MixRGB,
         input_kwargs={'Color1': noise_texture.outputs["Fac"], 'Color2': attribute.outputs["Color"]},
         attrs={'blend_type': 'MULTIPLY'})
-    
+
     colorramp = nw.new_node(Nodes.ColorRamp,
         input_kwargs={'Fac': mix})
     colorramp.color_ramp.elements[0].position = 0.0
@@ -65,11 +65,11 @@ def shader_bark(nw, rand=False, **input_kwargs):
     colorramp_2.color_ramp.elements[0].color = (0.5173, 0.5173, 0.5173, 1.0)
     colorramp_2.color_ramp.elements[1].position = 1.0
     colorramp_2.color_ramp.elements[1].color = (1.0, 1.0, 1.0, 1.0)
-    
+
     principled_bsdf = nw.new_node(Nodes.PrincipledBSDF,
         input_kwargs={'Base Color': mix_1, 'Roughness': colorramp_2.outputs["Color"]},
         attrs={'subsurface_method': 'BURLEY'})
-    
+
     material_output = nw.new_node(Nodes.MaterialOutput,
         input_kwargs={'Surface': principled_bsdf})
 

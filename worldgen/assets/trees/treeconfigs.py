@@ -144,14 +144,19 @@ def generate_twig_config():
                           'spawn_kargs': lambda idx: {'rnd_idx': avail_sub_idxs[idx],
                                                       'ang_min': np.pi/4, 'ang_max': np.pi/4 + np.pi/16, 'axis2': [0, 0, 1]}}
 
-    twig_config = {'n': 1,
-                   'path_kargs': lambda idx: {'n_pts': n_twig_pts, 'sz': twig_sz, 'std': .5, 'momentum': .5,
-                                              'pull_dir': [0, 0, init_z + np.random.randn() * z_rnd_factor],
-                                              'pull_factor': pull_factor},
-                   'spawn_kargs': lambda idx: {'init_vec': [0, 1, -init_z]},
-                   'children': [subtwig_config]}
-
-    return twig_config
+    return {
+        'n': 1,
+        'path_kargs': lambda idx: {
+            'n_pts': n_twig_pts,
+            'sz': twig_sz,
+            'std': 0.5,
+            'momentum': 0.5,
+            'pull_dir': [0, 0, init_z + np.random.randn() * z_rnd_factor],
+            'pull_factor': pull_factor,
+        },
+        'spawn_kargs': lambda idx: {'init_vec': [0, 1, -init_z]},
+        'children': [subtwig_config],
+    }
 
 
 def basic_tree(init_pos=np.array([[0, 0, 0]])):

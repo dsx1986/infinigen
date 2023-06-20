@@ -79,9 +79,7 @@ class FanBaseCoralFactory(BaseCoralFactory):
                         queue.append(o)
                         order.append(o)
             for v in reversed(order):
-                count = 1
-                for e in v.link_edges:
-                    count += counts[e.other_vert(v).index]
+                count = 1 + sum(counts[e.other_vert(v).index] for e in v.link_edges)
                 counts[v.index] = count
         vg = obj.vertex_groups.new(name='radius')
         thresh = uniform(100, 200)

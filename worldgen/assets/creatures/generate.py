@@ -40,7 +40,7 @@ def compute_joining_effects(genome, parts):
             continue
 
         br, sr = genome.att.bridge_rad, genome.att.smooth_rad
-        if not br > 0 and not sr > 0:
+        if br <= 0 and sr <= 0:
             continue
 
         logger.debug(f'Computing joining geometry for {i=} with {br=} and {sr=}')
@@ -52,16 +52,18 @@ def compute_joining_effects(genome, parts):
         except ValueError as e:
             logger.warning(f'join_smoothing.compute_intersection_curve for threw {e}, skipping')
             inter = None
-        
+
         if inter is not None and len(inter.data.vertices) < 4:
-            logger.warning(f'join_smoothing.compute_intersection_curve found too few verts, skipping')
+            logger.warning(
+                'join_smoothing.compute_intersection_curve found too few verts, skipping'
+            )
             inter = None
 
         if br > 0 and inter is not None:
             b = join_smoothing.create_bevel_connection(
                 parent.obj, part.obj, parent.bvh(), part.bvh(), 
                 width=br, intersection_curve=inter, segments=5)
-            b.name = part.obj.name + '.bevel_connector'
+            b.name = f'{part.obj.name}.bevel_connector'
             b.parent = parent.obj
             bridge_objs.append(b)
 
@@ -75,11 +77,11 @@ def select_large_component(o, thresh=0.95, tries=5):
         bpy.ops.mesh.select_all(action="DESELECT")
 
     r = 0
-    for i in range(tries):
+    for _ in range(tries):
         o.data.vertices[r].select = False
         r = np.random.randint(len(o.data.vertices))
         o.data.vertices[r].select = True
-        
+
         with butil.ViewportMode(o, 'EDIT'):
             bpy.ops.mesh.select_mode(type='VERT')
             bpy.ops.mesh.select_linked()

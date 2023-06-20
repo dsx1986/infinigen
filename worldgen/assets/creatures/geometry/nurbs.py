@@ -64,7 +64,7 @@ def apply_crease_values(obj, creases: np.array):
         bm = bmesh.from_edit_mesh(obj.data)
 
         creaseLayer = bm.edges.layers.crease.verify()
-        for i, e in enumerate(bm.edges):
+        for e in bm.edges:
             v1 = e.verts[0].index
             v2 = e.verts[1].index
             # channel 0 for ring edges, 1 for bridge edges
@@ -109,7 +109,7 @@ def blender_nurbs(ctrlpts, ws=None, name='loft_nurbs', resolution=(32, 32), cycl
 
     # create each profile as its own spline
     verts_4d = np.concatenate([ctrlpts, ws], axis=-1)
-    for i, profile in enumerate(verts_4d):
+    for profile in verts_4d:
         spline = curve.splines.new(type='NURBS')
         spline.points.add(m - len(spline.points))
         for p, co in zip(spline.points, profile):
@@ -127,7 +127,7 @@ def blender_nurbs(ctrlpts, ws=None, name='loft_nurbs', resolution=(32, 32), cycl
     spline.use_endpoint_u = True
     spline.use_cyclic_v = cyclic_v
     spline.resolution_u, spline.resolution_v = resolution
-    
+
     if kv_u is not None:
         bnurbs.set_knotsu(spline, kv_u)
     if kv_v is not None:

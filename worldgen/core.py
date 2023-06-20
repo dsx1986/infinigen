@@ -72,11 +72,11 @@ from assets.utils.tag import tag_system
 VERSION = '1.0.0'
 
 def sanitize_gin_override(overrides: list):
-    if len(overrides) > 0:
+    if overrides:
         print("Overriden parameters:", overrides)
     output = list(overrides)
     for i, o in enumerate(overrides):
-        if ('=' in o) and not any((c in o) for c in "\"'[]"):
+        if '=' in o and all(c not in o for c in "\"'[]"):
             k, v = o.split('=')
             try:
                 ast.literal_eval(v)
@@ -325,8 +325,8 @@ def determine_scene_seed(args):
     if args.seed is None:
         if Task.Coarse not in args.task:
             raise ValueError(
-                f'Running tasks on an already generated scene, you need to specify --seed or results will'
-                f' not be view-consistent')
+                'Running tasks on an already generated scene, you need to specify --seed or results will not be view-consistent'
+            )
         return randint(1e7), 'chosen at random'
 
     # WARNING: Do not add support for decimal numbers here, it will cause ambiguity, as some hex numbers are valid decimals

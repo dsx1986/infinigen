@@ -40,10 +40,8 @@ def snap_iks_to_floor(targets, floor_bvh, minweight=0.7):
     def find_floor_offset(t):
         ray_origin = mathutils.Vector((t.matrix_world.translation.x, t.matrix_world.translation.y, bounds[2, 1]))
         location, normal, index, dist = floor_bvh.ray_cast(ray_origin, mathutils.Vector((0, 0, -1)))
-        if location is None:
-            return None
-        return location - t.matrix_world.translation
-    
+        return None if location is None else location - t.matrix_world.translation
+
     feet = get_targets('foot')
     feet_offsets = [find_floor_offset(f) for f in feet]
 
@@ -74,14 +72,14 @@ def snap_iks_to_floor(targets, floor_bvh, minweight=0.7):
 
         for h, ho in zip(hips, hip_offsets):
             h.location += ho
-        
+
         for o in get_targets('head'): # front-associated
             o.location += hip_offsets[-1]
         for o in get_targets('tail'): # back associated
             o.location += hip_offsets[0]
 
     else:
-        logging.warning(f'Couldnt establish feet-hip mapping')
+        logging.warning('Couldnt establish feet-hip mapping')
         off = mathutils.Vector(np.array(feet_offsets).mean(axis=0))
         for o in targets:
             if o in feet:

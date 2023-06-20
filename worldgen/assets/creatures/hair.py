@@ -68,11 +68,10 @@ def compute_hair_placement_vertgroup(obj, root, avoid_features_dist):
     avoid_types = ['Eyeball', 'Teeth', 'Tongue']#, 'Nose']
     extras = [o for o in butil.iter_object_tree(root) if 'extra' in o.name]
     avoid_extras = [o for o in extras if any(n in o.name for n in avoid_types)]
-    
+
     avoid_verts = []
     for o in avoid_extras:
-        for v in o.data.vertices:
-            avoid_verts.append(o.matrix_world @ v.co)
+        avoid_verts.extend(o.matrix_world @ v.co for v in o.data.vertices)
     avoid_verts = np.array(avoid_verts).reshape(-1, 3)
 
     verts = np.array([obj.matrix_world @ v.co for v in obj.data.vertices])
@@ -213,7 +212,7 @@ def geo_transfer_hair_attributes(nw, obj, attrs):
 
     attrs_out = {}
     for attr_name in attrs:
-        if not attr_name in obj.data.attributes:
+        if attr_name not in obj.data.attributes:
             logger.warn(f'Attempted to geo_transfer_hair_attributes() including {attr_name=} which is not present on {obj=}. Available are {list(obj.data.attributes.keys())}')
             continue
 
@@ -241,7 +240,7 @@ def configure_hair(obj, root, hair_genome: dict, apply=True, is_dynamic=None):
     n_guide_hairs = count // hair_genome['clump_n']
     hair_genome['grooming']['Tuft Amount'] = hair_genome['clump_n']
 
-    logger.debug(f'Computing hair placement vertex group')
+    logger.debug('Computing hair placement vertex group')
     avoid_group = compute_hair_placement_vertgroup(obj, root, 
         avoid_features_dist=hair_genome['avoid_features_dist'])
 
@@ -249,7 +248,7 @@ def configure_hair(obj, root, hair_genome: dict, apply=True, is_dynamic=None):
     add_hair_particles(obj, params={'count': n_guide_hairs}, 
         props={'vertex_group_density': avoid_group.name})
 
-    logger.debug(f'Converting particles to curves')
+    logger.debug('Converting particles to curves')
     with butil.SelectObjects(obj):
         for m in obj.modifiers:
             if m.type == 'PARTICLE_SYSTEM':
@@ -260,7 +259,7 @@ def configure_hair(obj, root, hair_genome: dict, apply=True, is_dynamic=None):
     with butil.SelectObjects(obj):
         bpy.ops.object.particle_system_remove()
 
-    logger.debug(f'Performing geonodes hair grooming')
+    logger.debug('Performing geonodes hair grooming')
     with butil.DisableModifiers(obj):
         _, mod = butil.modify_mesh(curves, 'NODES', apply=False, return_mod=True)
         mod.node_group = nodegroup_hair_grooming()
@@ -268,7 +267,7 @@ def configure_hair(obj, root, hair_genome: dict, apply=True, is_dynamic=None):
 
         if apply:
             butil.apply_modifiers(curves, mod=mod)
-    
+
     curves.parent = obj
     curves.matrix_parent_inverse = obj.matrix_world.inverted() # keep prexisting transform
     curves.data.surface = obj
@@ -279,8 +278,8 @@ def configure_hair(obj, root, hair_genome: dict, apply=True, is_dynamic=None):
     if obj.active_material is not None:
         
         hair_mat = as_hair_bsdf(obj.active_material, hair_genome['material'])
-        
-        logger.debug(f'Transfer material attr dependencies from surf to curves')
+
+        logger.debug('Transfer material attr dependencies from surf to curves')
         attr_deps = mat_attr_dependencies(hair_mat.node_tree)
         attr_deps = [a for a in attr_deps if a in obj.data.attributes]
         surface.add_geomod(curves, geo_transfer_hair_attributes, apply=apply,
@@ -290,7 +289,7 @@ def configure_hair(obj, root, hair_genome: dict, apply=True, is_dynamic=None):
     if is_dynamic:
         attach_hair_to_surface(curves, obj)
 
-    curves.name = obj.name + '.hair_curves'
+    curves.name = f'{obj.name}.hair_curves'
 
     return curves
 

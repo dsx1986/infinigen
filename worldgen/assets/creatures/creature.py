@@ -291,7 +291,7 @@ def genome_to_creature(genome: genome.CreatureGenome, name: str):
             extra['index'] = i
 
     # write attribute values that must come before posing/arrangement
-    logger.debug(f'Writing local attributes')
+    logger.debug('Writing local attributes')
     for i, (part, genode) in enumerate(tree.tzip(parts, genome.parts)):
         tags = genode.part_factory.tags
         write_local_attributes(part, i, tags)
@@ -304,7 +304,7 @@ def genome_to_creature(genome: genome.CreatureGenome, name: str):
         attach(part, parent, genome.att)
 
     # write any attributes that must come after posign/arrangement
-    logger.debug(f'Writing global attributes')
+    logger.debug('Writing global attributes')
     for part in parts:
         write_global_attributes(part)
 

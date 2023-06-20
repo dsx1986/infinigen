@@ -94,7 +94,7 @@ def split_inview(
 
     if raycast:
         mask *= raycast_visiblity_mask(obj, cam)
-    
+
     inview = duplicate_mask(obj, mask, dilate=dilate)
 
     if outofview:
@@ -107,12 +107,12 @@ def split_inview(
         sa_out = butil.surface_area(outview)
         print(f'split {obj.name=} into inview area {sa_in:.2f} and outofview area {sa_out:.2f}')
 
-    inview.name = obj.name + '.inview'
-    outview.name = obj.name + '.outofview'
+    inview.name = f'{obj.name}.inview'
+    outview.name = f'{obj.name}.outofview'
 
     if suffix is not None:
-        inview.name += '_' + suffix
-        outview.name += '_' + suffix
+        inview.name += f'_{suffix}'
+        outview.name += f'_{suffix}'
 
     if hide_render is not None:
         inview.hide_render = hide_render

@@ -1593,6 +1593,4 @@ class Chameleon(PartFactory):
         return {}
     
     def make_part(self, params):
-        part = nodegroup_to_part(nodegroup_chameleon, params)
-
-        return part
+        return nodegroup_to_part(nodegroup_chameleon, params)

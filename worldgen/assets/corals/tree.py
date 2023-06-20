@@ -72,15 +72,29 @@ class TreeBaseCoralFactory(BaseCoralFactory):
                 'ang_max': np.pi / 8,
                 'axis2': [0, 0, 1]},
             'children': [detail_config]}
-        major_config = {
+        return {
             'n': n_branch,
-            'path_kargs': lambda idx: {'n_pts': n_major + 1, 'std': .4, 'momentum': .4, 'sz': uniform(.08, .1)},
+            'path_kargs': lambda idx: {
+                'n_pts': n_major + 1,
+                'std': 0.4,
+                'momentum': 0.4,
+                'sz': uniform(0.08, 0.1),
+            },
             'spawn_kargs': lambda idx: {
-                'init_vec': [span * np.cos(2 * np.pi * idx / n_branch + uniform(-np.pi / 9, np.pi / 9)),
-                    span * np.sin(2 * np.pi * idx / n_branch + uniform(-np.pi / 9, np.pi / 9)),
-                    math.sqrt(1 - span * span)]},
-            'children': [minor_config]}
-        return major_config
+                'init_vec': [
+                    span
+                    * np.cos(
+                        2 * np.pi * idx / n_branch + uniform(-np.pi / 9, np.pi / 9)
+                    ),
+                    span
+                    * np.sin(
+                        2 * np.pi * idx / n_branch + uniform(-np.pi / 9, np.pi / 9)
+                    ),
+                    math.sqrt(1 - span * span),
+                ]
+            },
+            'children': [minor_config],
+        }
 
     @property
     def twig_config(self):
@@ -115,19 +129,29 @@ class TreeBaseCoralFactory(BaseCoralFactory):
                 'ang_max': np.pi / 6,
                 'axis2': [0, 0, 1]},
             'children': [detail_config]}
-        major_config = {
+        return {
             'n': n_branch,
             'path_kargs': lambda idx: {
                 'n_pts': n_major * 2 + 1,
-                'std': .4,
-                'momentum': .4,
-                'sz': uniform(.08, .1)},
+                'std': 0.4,
+                'momentum': 0.4,
+                'sz': uniform(0.08, 0.1),
+            },
             'spawn_kargs': lambda idx: {
-                'init_vec': [span * np.cos(2 * np.pi * idx / n_branch + uniform(-np.pi / 9, np.pi / 9)),
-                    span * np.sin(2 * np.pi * idx / n_branch + uniform(-np.pi / 9, np.pi / 9)),
-                    math.sqrt(1 - span * span)]},
-            'children': [minor_config]}
-        return major_config
+                'init_vec': [
+                    span
+                    * np.cos(
+                        2 * np.pi * idx / n_branch + uniform(-np.pi / 9, np.pi / 9)
+                    ),
+                    span
+                    * np.sin(
+                        2 * np.pi * idx / n_branch + uniform(-np.pi / 9, np.pi / 9)
+                    ),
+                    math.sqrt(1 - span * span),
+                ]
+            },
+            'children': [minor_config],
+        }
 
     @staticmethod
     def radius_fn(base_radius, size, resolution):

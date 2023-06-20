@@ -21,8 +21,7 @@ def flow_to_colorwheel(flow_path):
     assert flow_path.exists() and flow_path.suffix == ".exr"
     optical_flow = cv2.imread(str(flow_path),  cv2.IMREAD_ANYCOLOR | cv2.IMREAD_ANYDEPTH)
     flow_uv = optical_flow[...,:2]
-    flow_color = flow_vis.flow_to_color(flow_uv, convert_to_bgr=False)
-    return flow_color
+    return flow_vis.flow_to_color(flow_uv, convert_to_bgr=False)
 
 def depth_to_jet(depth, scale_vmin=1.0):
     valid = (depth > 1e-3) & (depth < 1e4)

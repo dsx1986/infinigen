@@ -123,12 +123,12 @@ def fish_genome():
     if U() < 0.9:
         n_dorsal = 1 #if U() < 0.6 else randint(1, 4)
         coord = (U(0.3, 0.45), 1, 0.7)
-        for i in range(n_dorsal):
+        for _ in range(n_dorsal):
             dorsal_fin = parts.ridged_fin.FishFin(fin_params((U(0.4, 0.6), 0.5, 0.2), dorsal=True), rig=False)
             genome.attach(genome.part(dorsal_fin), body, coord=coord, joint=Joint(rest=(0, -100, 0)))
 
     rot = lambda r: np.array((20, r, -205)) + N(0, 7, 3)
-    
+
     if U() < 0.8:
         pectoral_fin = parts.ridged_fin.FishFin(fin_params((0.1, 0.5, 0.3)))
         coord = (U(0.65, 0.8), U(55, 65) / 180, .9)
@@ -152,7 +152,7 @@ def fish_genome():
     tail_fin = parts.ridged_fin.FishFin(fin_params((0.12, 0.5, 0.35)), rig=False)
     for vdir in [-1, 1]:
         genome.attach(genome.part(tail_fin), body, coord=(0.05, 0, 0), joint=Joint((0, -angle * vdir, 0)))
-    
+
     eye_fac = parts.eye.MammalEye({'Eyelids': False, 'Radius': N(0.036, 0.01)})
     coord = (0.9, 0.6, 0.9)
     for side in [-1, 1]:
@@ -250,11 +250,11 @@ class FishFactory(AssetFactory):
             root, parts, instance_genome, rigging=(self.animation_mode is not None), rig_before_subdiv=True,
             postprocess_func=seeded_fish_postprocess, adapt_mode='subdivide', **kwargs)
         if self.animation_mode is not None and arma is not None:
-            if self.animation_mode == 'idle' or self.animation_mode == 'roam':
+            if self.animation_mode in ['idle', 'roam']:
                 animate_fish_swim(arma, instance_genome.postprocess_params['anim'])
             else:
                 raise ValueError(f'Unrecognized {self.animation_mode=}')
-            
+
         if simulate:
             joined = simulate_fish_cloth(joined, extras, instance_genome.postprocess_params['cloth'])
         else:
@@ -262,7 +262,7 @@ class FishFactory(AssetFactory):
             joined.parent = root
 
         tag_object(root, 'fish')
-            
+
         return root
     
 

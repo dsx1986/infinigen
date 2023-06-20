@@ -395,16 +395,16 @@ def set_tree_radius(nw):
 def bark_shader_2(nw):
   attribute = nw.new_node(Nodes.Attribute,
       attrs={'attribute_name': 'offset_barkgeo2'})
-  
+
   reroute = nw.new_node(Nodes.Reroute,
       input_kwargs={'Input': attribute.outputs["Color"]})
-  
+
   math = nw.new_node(Nodes.Math,
       input_kwargs={0: reroute, 1: 0.0})
-  
+
   colorramp_1 = nw.new_node(Nodes.ColorRamp,
       input_kwargs={'Fac': math})
-  for i in range(2):
+  for _ in range(2):
     colorramp_1.color_ramp.elements.new(0)
   colorramp_1.color_ramp.elements[0].position = 0.0
   # colorramp_1.color_ramp.elements[0].color = (0.0025, 0.0019, 0.0017, 1.0)
@@ -415,15 +415,15 @@ def bark_shader_2(nw):
   colorramp_1.color_ramp.elements[2].color = (0.1094, 0.0656, 0.054, 1.0)
   colorramp_1.color_ramp.elements[3].position = 0.6268
   colorramp_1.color_ramp.elements[3].color = (0.0712, 0.0477, 0.0477, 1.0)
-  
+
   math_1 = nw.new_node(Nodes.Math,
       input_kwargs={0: 1.0, 1: reroute},
       attrs={'operation': 'SUBTRACT'})
-  
+
   principled_bsdf = nw.new_node(Nodes.PrincipledBSDF,
       input_kwargs={'Base Color': colorramp_1.outputs["Color"], 'Roughness': math_1},
       attrs={'subsurface_method': 'BURLEY'})
-  
+
   material_output = nw.new_node(Nodes.MaterialOutput,
       input_kwargs={'Surface': principled_bsdf})
 

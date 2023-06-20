@@ -181,17 +181,14 @@ class NodeWrangler():
 
         if node_type in [Nodes.VoronoiTexture, Nodes.NoiseTexture, Nodes.WaveTexture, Nodes.WhiteNoiseTexture,
             Nodes.MusgraveTexture]:
-            if not (input_args != [] or "Vector" in input_kwargs):
-                w = f"{self.node_group=}, no vector input for noise texture in specified"
+            if input_args == [] and "Vector" not in input_kwargs:
                 if self.input_consistency_forced:
+                    w = f"{self.node_group=}, no vector input for noise texture in specified"
                     logger.debug(f"{w}, it is fixed automatically by using position for consistency")
                     if self.node_group.type == "SHADER":
                         input_kwargs["Vector"] = self.new_node('ShaderNodeNewGeometry')
                     else:
                         input_kwargs["Vector"] = self.new_node(Nodes.InputPosition)
-                else:
-                    pass #print(f"{w}, please fix it if you found it causes inconsistency")
-
         input_keyval_list = list(enumerate(input_args)) + list(input_kwargs.items())
         for input_socket_name, input_item in input_keyval_list:
             if input_item is None:
@@ -199,8 +196,8 @@ class NodeWrangler():
             if node_type == Nodes.GroupOutput:
                 assert not isinstance(input_socket_name,
                                       int), f'Attribute inputs to group output nodes must be given a string ' \
-                                            f'name, integer name ' \
-                                            f'{input_socket_name} will not suffice'
+                                                f'name, integer name ' \
+                                                f'{input_socket_name} will not suffice'
                 assert not isinstance(input_item,
                                       list), 'Multi-input sockets to GroupOutput nodes are impossible'
                 if input_socket_name not in node.inputs:
@@ -288,18 +285,16 @@ class NodeWrangler():
             else:
                 # assert attribute is not None
                 datatype = 'FLOAT_VECTOR'
-            return node_info.DATATYPE_TO_NODECLASS[datatype]
         else:
             if dtype in node_info.NODECLASSES:
                 return dtype
+            if dtype in node_info.NODETYPE_TO_DATATYPE:
+                datatype = node_info.NODETYPE_TO_DATATYPE[dtype]
+            elif dtype in node_info.PYTYPE_TO_DATATYPE:
+                datatype = node_info.PYTYPE_TO_DATATYPE[dtype]
             else:
-                if dtype in node_info.NODETYPE_TO_DATATYPE:
-                    datatype = node_info.NODETYPE_TO_DATATYPE[dtype]
-                elif dtype in node_info.PYTYPE_TO_DATATYPE:
-                    datatype = node_info.PYTYPE_TO_DATATYPE[dtype]
-                else:
-                    raise ValueError(f'Could not parse {dtype=}')
-                return node_info.DATATYPE_TO_NODECLASS[datatype]
+                raise ValueError(f'Could not parse {dtype=}')
+        return node_info.DATATYPE_TO_NODECLASS[datatype]
 
     def _update_socket(self, input_socket, input_item):
         output_socket = infer_output_socket(input_item)
@@ -353,13 +348,13 @@ class NodeWrangler():
         return node
 
     def get_position_translation_seed(self, i):
-        if not i in self.position_translation_seed:
+        if i not in self.position_translation_seed:
             self.position_translation_seed[i] = random_vector3()
         return self.position_translation_seed[i]
 
     @staticmethod
     def is_socket(node):
-        return isinstance(node, bpy.types.NodeSocket) or isinstance(node, bpy.types.Node)
+        return isinstance(node, (bpy.types.NodeSocket, bpy.types.Node))
 
     @staticmethod
     def is_vector_socket(node):

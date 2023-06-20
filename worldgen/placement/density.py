@@ -56,7 +56,7 @@ def placement_mask(scale=0.05, select_thresh=0.55, normal_thresh=0.5, normal_thr
             conditions = []
             for k in keys:
                 conditions.append(nw.new_node(Nodes.Compare, attrs={'operation': "EQUAL", "data_type": "FLOAT"}, input_args=[eval_argument(nw, "MaskTag"), tag_dict[k]]))
-            if len(conditions) > 0:
+            if conditions:
                 mask = nw.scalar_multiply(
                     mask,
                     nw.scalar_add(*conditions)

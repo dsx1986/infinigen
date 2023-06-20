@@ -74,6 +74,11 @@ class PineconeFactory(MonocotGrowthFactory):
                                  [bright_color, bright_color, dark_color, dark_color], )
         noise_texture = nw.new_node(Nodes.NoiseTexture, input_kwargs={'Scale': 50})
         roughness = nw.build_float_curve(noise_texture, [(0, .5), (1, .8)])
-        bsdf = nw.new_node(Nodes.PrincipledBSDF,
-                           input_kwargs={'Base Color': color, 'Roughness': roughness, 'Specular': specular})
-        return bsdf
+        return nw.new_node(
+            Nodes.PrincipledBSDF,
+            input_kwargs={
+                'Base Color': color,
+                'Roughness': roughness,
+                'Specular': specular,
+            },
+        )

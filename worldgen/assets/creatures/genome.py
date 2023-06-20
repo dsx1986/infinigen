@@ -97,9 +97,7 @@ def compute_child_matching(a: list[Tree], b: list[Tree]):
 
 def lerp_any(a, b, t):
     def cast(x):
-        if isinstance(x, (tuple, list)):
-            return np.array(x)
-        return x
+        return np.array(x) if isinstance(x, (tuple, list)) else x
 
     res = lerp(cast(a), cast(b), t)
 
@@ -117,9 +115,12 @@ def interp_attachment(a: Attachment, b: Attachment, t: float):
 
     joint = Joint(rest=lerp(a.joint.rest, b.joint.rest, t), bounds=s.joint.bounds)
 
-    att = Attachment(coord=lerp(a.coord, b.coord, t), joint=joint, bridge=s.bridge, side=s.side)
-
-    return att
+    return Attachment(
+        coord=lerp(a.coord, b.coord, t),
+        joint=joint,
+        bridge=s.bridge,
+        side=s.side,
+    )
 
 
 def interp_creature_node(a: CreatureNode, b: CreatureNode, t):
@@ -136,29 +137,31 @@ def interp_creature_node(a: CreatureNode, b: CreatureNode, t):
 def interp_part_tree(a: Tree, b: Tree, t: float):
     new_children = []
     for ac, bc in compute_child_matching(a.children, b.children):
-        if ac is None:
-            if t < 0.5:
-                continue
-            else:
-                new_children.append(bc)
+        if (
+            ac is None
+            and t < 0.5
+            or ac is not None
+            and bc is None
+            and t >= 0.5
+        ):
+            continue
+        elif ac is None:
+            new_children.append(bc)
         elif bc is None:
-            if t < 0.5:
-                new_children.append(ac)
-            else:
-                continue
+            new_children.append(ac)
         else:
             new_children.append(interp_part_tree(ac, bc, t))
     return Tree(item=interp_creature_node(a.item, b.item, t), children=new_children)
 
 
 def interp_genome(a: CreatureGenome, b: CreatureGenome, t: float) -> CreatureGenome:
-    assert 0 <= t and t <= 1
+    assert 0 <= t <= 1
 
     if t == 0:
         return a
     elif t == 1:
         return b
-    
+
     #postprocess = interp_dict(a.postprocess_params, b.postprocess_params, t, recurse=True, keys='switch')
     #TODO a.postprocess_params
     postprocess = a.postprocess_params

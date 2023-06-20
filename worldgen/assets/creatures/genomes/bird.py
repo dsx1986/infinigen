@@ -118,12 +118,9 @@ def duck_genome(mode):
         'Extension': extension
     })
 
-    
+
     wing_coord = (N(0.7, 0.02), 110/180 * N(1, 0.1), 0.95)
-    if wing_fac.params['Extension'] > 0.5:
-        wing_rot = (90, 0, 90)
-    else:
-        wing_rot = (90, 40, 90)
+    wing_rot = (90, 0, 90) if wing_fac.params['Extension'] > 0.5 else (90, 40, 90)
     for side in [-1, 1]:
         wing = genome.part(wing_fac)
         genome.attach(wing, body, coord=wing_coord, joint=Joint(rest=wing_rot), side=side)
@@ -147,15 +144,15 @@ def duck_genome(mode):
     return genome.CreatureGenome(
         parts=body,
         postprocess_params=dict(
-            animation=dict(), 
+            animation={},
             hair=bird_hair_params(flying=False),
             surface_registry=[
                 (surfaces.templates.spot_sparse_attr, 4),
                 (surfaces.templates.reptile_brown_circle_attr, 0.5),
                 (surfaces.templates.reptile_two_color_attr, 0.5),
-                (surfaces.templates.bird, 5)
-            ]
-        ) 
+                (surfaces.templates.bird, 5),
+            ],
+        ),
     )
 
 def flying_bird_genome(mode):
@@ -197,10 +194,7 @@ def flying_bird_genome(mode):
     })
 
     wing_coord = (N(0.68, 0.02), 150 / 180 * N(1, 0.1), 0.8)
-    if wing_fac.params['Extension'] > 0.5:
-        wing_rot = (90, 0, 90)
-    else:
-        wing_rot = (90, 40, 90)
+    wing_rot = (90, 0, 90) if wing_fac.params['Extension'] > 0.5 else (90, 40, 90)
     for side in [-1, 1]:
         wing = genome.part(wing_fac)
         genome.attach(wing, body, coord=wing_coord, joint=Joint(rest=wing_rot), side=side)
@@ -224,15 +218,15 @@ def flying_bird_genome(mode):
     return genome.CreatureGenome(
         parts=body,
         postprocess_params=dict(
-            animation=dict(), 
+            animation={},
             hair=bird_hair_params(flying=True),
             surface_registry=[
-                #(surfaces.templates.spot_sparse_attr, 4),
-                #(surfaces.templates.reptile_brown_circle_attr, 0.5),
-                #(surfaces.templates.reptile_two_color_attr, 0.5),
+                # (surfaces.templates.spot_sparse_attr, 4),
+                # (surfaces.templates.reptile_brown_circle_attr, 0.5),
+                # (surfaces.templates.reptile_two_color_attr, 0.5),
                 (surfaces.templates.bird, 5)
-            ]
-        ) 
+            ],
+        ),
     )
 
 @gin.configurable

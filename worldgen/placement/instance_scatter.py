@@ -120,12 +120,10 @@ def geo_instance_scatter(
     points = nw.new_node(Nodes.DistributePointsOnFaces, 
         [base_geo], input_kwargs={"Density": overall_density, "Selection": selection_val})
     distribute_points = points
-        
+
     if min_spacing > 0:
         points = nw.new_node(Nodes.MergeByDistance,
             input_kwargs={'Geometry': points, 'Distance': surface.eval_argument(nw, min_spacing)})
-
-    point_fields = {}
 
     normal = (distribute_points, "Normal") if normal is None else surface.eval_argument(nw, normal)
     rotation_val = nw.new_node(Nodes.AlignEulerToVector, attrs={"axis": "Z"},
@@ -135,8 +133,7 @@ def geo_instance_scatter(
     if rotation_offset is not None:
         rotation_val = nw.new_node(Nodes.RotateEuler, attrs=dict(space='OBJECT'), input_kwargs={
             'Rotation':surface.eval_argument(nw, rotation_offset), 'Rotate By':rotation_val})
-    point_fields['rotation'] = (rotation_val, 'FLOAT_VECTOR')
-    
+    point_fields = {'rotation': (rotation_val, 'FLOAT_VECTOR')}
     if instance_index is not None:
         inst = surface.eval_argument(nw, instance_index, n=len(collection.objects))
         point_fields['instance_index'] = (inst, 'INT')
@@ -146,7 +143,7 @@ def geo_instance_scatter(
         point_fields['ground_offset'] = (surface.eval_argument(nw, ground_offset), 'FLOAT')
 
     if dist_max is not None or fov is not None:
-        
+
         for k, (soc, dtype) in point_fields.items():
             points = nw.new_node(Nodes.CaptureAttribute, input_kwargs={'Geometry': points, 'Value': soc}, attrs={'data_type': dtype})
             point_fields[k] = points
@@ -162,7 +159,7 @@ def geo_instance_scatter(
     else:
         for k, v in point_fields.items():
             point_fields[k] = v[0]
-    
+
     collection_info = nw.new_node(Nodes.CollectionInfo, [collection, True, reset_children])
 
     instances = nw.new_node(Nodes.InstanceOnPoints, [points], input_kwargs={
@@ -170,7 +167,7 @@ def geo_instance_scatter(
         'Instance Index': point_fields.get('instance_index'), 
         "Rotation": point_fields.get('rotation'),
         "Scale": point_fields.get('scaling')})
-    
+
     if ground_offset != 0:
         instances = nw.new_node(Nodes.TranslateInstances, [instances],
             input_kwargs={ "Translation": nw.combine(0, 0, point_fields['ground_offset']), "Local Space": True})

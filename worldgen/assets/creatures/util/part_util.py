@@ -57,10 +57,7 @@ def nodegroup_to_part(nodegroup_func, params, kwargs=None, base_obj=None, split_
         base_obj = butil.spawn_vert('temp')
 
     with butil.TemporaryObject(base_obj) as base_obj:
-        if kwargs is not None:
-            ng = nodegroup_func(**kwargs)
-        else:
-            ng = nodegroup_func()
+        ng = nodegroup_func(**kwargs) if kwargs is not None else nodegroup_func()
         geo_outputs = [o for o in ng.outputs if o.bl_socket_idname == 'NodeSocketGeometry']
         objs = {o.name: extract_nodegroup_geo(base_obj, ng, o.name, ng_params=params) for o in geo_outputs}
 
@@ -131,12 +128,10 @@ def nurbs_to_part(handles, face_size=0.07):
 def linear_combination(corners, weights):
     assert len(corners) == len(weights)
     first = corners[0]
-    
-    if not isinstance(first, dict):
-        ret = sum(corners[i] * weights[i] for i in range(len(corners)))
-        return ret
 
-    results = dict()
+    if not isinstance(first, dict):
+        return sum(corners[i] * weights[i] for i in range(len(corners)))
+    results = {}
     for k in first.keys():
         new_corners = [corner[k] for corner in corners]
         results[k] = linear_combination(new_corners, weights)
@@ -190,17 +185,15 @@ def random_convex_coord(names, select=None, temp=1):
         temp = temp * np.ones(len(names))
     elif isinstance(temp, dict):
         temp = np.array([temp[n] for n in names])
-    elif isinstance(temp, np.ndarray):
-        pass
-    else:
+    elif not isinstance(temp, np.ndarray):
         raise ValueError(f'Unrecognized {temp=}')
-    
+
 
     if isinstance(select, str):
-        if not select in names:
+        if select not in names:
             raise ValueError(f'Attempted to random_convex_comb({names=}, {select=}) but select is invalid')
         return {n: 1 if n == select else 0 for n in names}
-    
+
     if isinstance(select, dict):
         if any(k not in names for k in select):
             raise ValueError(f'Attempted to random_convex_comb({names=}, {select.keys()=}) but select is invalid')
@@ -210,7 +203,7 @@ def random_convex_coord(names, select=None, temp=1):
             weights[k] = v / norm
         return weights
 
-    
+
     vs = np.random.dirichlet(temp)
     weights = {k: vs[i] for i, k in enumerate(names)}
     return weights

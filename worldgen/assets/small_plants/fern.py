@@ -392,13 +392,10 @@ def geometry_pinnae_nodes(nw: NodeWrangler, leaf, leaf_num_param=18, age_param=0
     mode_random_bit = randint(0, 2, size=(1,))[0]
     if mode_random_bit:
         pinnae_contour = [0, 0.2, 0.6, 1.4, 3.0, 4.0, 5.0, 6.0]
-        for i in range(8):
-            pinnae_contour[i] = (pinnae_contour[i] + normal(0, 0.04 * i, (1,))[0]) / 6.
     else:
         pinnae_contour = [0, 0.2, 0.6, 1.4, 3.0, 4.0, 5.0, 4.2]
-        for i in range(8):
-            pinnae_contour[i] = (pinnae_contour[i] + normal(0, 0.04 * i, (1,))[0]) / 6.
-
+    for i in range(8):
+        pinnae_contour[i] = (pinnae_contour[i] + normal(0, 0.04 * i, (1,))[0]) / 6.
     # Common Components
     pinnaelevel1instanceposition = nw.new_node(nodegroup_pinnae_level1_instance_position(pinnae_contour).name,
                                                input_kwargs={0: pinna_index, 'From Max': pinna_num, 2: age})
@@ -451,11 +448,12 @@ def geometry_pinnae_nodes(nw: NodeWrangler, leaf, leaf_num_param=18, age_param=0
     # Each Pinna Version
     rotation, pinnaelevel1rotation = True, None
     for i in range(version_num_param):
-        # Define the Pinna Contour of each Version
-        pinna_contour = []
         k = uniform(0.5, 0.58, size=(1,))[0]
-        for j in range(6):
-            pinna_contour.append(k * np.clip(j * (1. + normal(0, 0.1, (1,))[0]) / 5. + 0.08, 0, 0.7))
+        pinna_contour = [
+            k
+            * np.clip(j * (1.0 + normal(0, 0.1, (1,))[0]) / 5.0 + 0.08, 0, 0.7)
+            for j in range(6)
+        ]
         # Define the Num Leaf of each Version
         integer_2 = nw.new_node(Nodes.Integer, attrs={'integer': 10})
         integer_2.integer = leaf_num_param + randint(-1, 2, (1,))[0]
@@ -516,11 +514,12 @@ def geometry_pinnae_nodes(nw: NodeWrangler, leaf, leaf_num_param=18, age_param=0
             mesh_lines_left.append(pinnaelevel1stein)
 
     for i in range(version_num_param):
-        # Define the Pinna Contour of each Version
-        pinna_contour = []
         k = uniform(0.5, 0.58, size=(1,))[0]
-        for j in range(6):
-            pinna_contour.append(k * np.clip(j * (1. + normal(0, 0.1, (1,))[0]) / 5. + 0.08, 0, 0.7))
+        pinna_contour = [
+            k
+            * np.clip(j * (1.0 + normal(0, 0.1, (1,))[0]) / 5.0 + 0.08, 0, 0.7)
+            for j in range(6)
+        ]
         # Define the Num Leaf of each Version
         integer_2 = nw.new_node(Nodes.Integer, attrs={'integer': 10})
         integer_2.integer = leaf_num_param + randint(-1, 2, (1,))[0]
@@ -578,10 +577,10 @@ def geometry_pinnae_nodes(nw: NodeWrangler, leaf, leaf_num_param=18, age_param=0
 
 
 def check_vicinity(rotation, pinnae_rs):
-    for r in pinnae_rs:
-        if abs(rotation[1] - r[1]) < 0.1 and abs(rotation[2] - r[2]) < 0.15:
-            return True
-    return False
+    return any(
+        abs(rotation[1] - r[1]) < 0.1 and abs(rotation[2] - r[2]) < 0.15
+        for r in pinnae_rs
+    )
 
 
 def geo_fern(nw: NodeWrangler, **kwargs):

@@ -16,11 +16,11 @@ from placement.instance_scatter import scatter_instances
 
 def apply(obj, n=5, selection=None):
     n_species = np.random.randint(2, 3)
-    factories = list(UrchinFactory(np.random.randint(1e5)) for i in range(n_species))
+    factories = [UrchinFactory(np.random.randint(1e5)) for i in range(n_species)]
     urchin = make_asset_collection(factories, name='urchin',
                                               weights=np.random.uniform(0.5, 1, len(factories)), n=n,
                                               verbose=True)
-    
+
     scale = U(0.1, 0.8)
 
     def ground_offset(nw: NodeWrangler):

@@ -62,7 +62,7 @@ def grow_step(bm, vg_index=0, split_radius=.5, repulsion_radius=1., dt=.1, growt
             if l / split_radius > 1 / avg_weight:
                 edges_to_subdivide.append(e)
 
-    if len(edges_to_subdivide) > 0:
+    if edges_to_subdivide:
         # noinspection PyArgumentList
         bmesh.ops.subdivide_edges(bm, edges=edges_to_subdivide, smooth=1.0, cuts=1, use_grid_fill=True,
                                   use_single_edge=True)

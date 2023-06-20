@@ -77,10 +77,10 @@ class GenericTreeFactory(AssetFactory):
 
     def create_placeholder(self, i, loc, rot):
 
-        logger.debug(f'generating tree skeleton')
+        logger.debug('generating tree skeleton')
         skeleton_obj = tree.tree_skeleton(
             self.genome.skeleton, self.genome.trunk_spacecol, self.genome.roots_spacecol, init_pos=(0, 0, 0), scale=self.scale)
-        
+
         if self.coarse_mesh_placeholder:
             pholder =  self._create_coarse_mesh(skeleton_obj)
         else:
@@ -154,7 +154,7 @@ class GenericTreeFactory(AssetFactory):
         butil.parent_to(skin_obj, placeholder, no_inverse=True, no_transform=True)
 
         if self.realize:
-            logger.debug(f'realizing tree children')
+            logger.debug('realizing tree children')
             butil.apply_modifiers(skin_obj)
             butil.apply_modifiers(skeleton_obj)
             with butil.SelectObjects([skin_obj, skeleton_obj], active=0):
@@ -328,10 +328,7 @@ class TreeFactory(GenericTreeFactory):
         # return 'leaf_maple'
         leaf_type = np.random.choice(['leaf', 'leaf_v2', 'leaf_broadleaf', 'leaf_ginko', 'leaf_maple'], p=[0, 0.0, 0.70, 0.15, 0.15])
         flower_type = np.random.choice(['flower', 'berry', None], p=[1.0, 0.0, 0.0])
-        if season == "spring":
-            return [flower_type]
-        else:
-            return [leaf_type]
+        return [flower_type] if season == "spring" else [leaf_type]
         # return [leaf_type, flower_type]
         # return ['leaf_broadleaf', 'leaf_maple', 'leaf_ginko', 'flower']
 
@@ -361,11 +358,7 @@ class TreeFactory(GenericTreeFactory):
 
             trunk_surface = surface.registry('bark')
 
-            if uniform() < fruit_chance:
-                fruit_type = self.get_fruit_type()
-            else:
-                fruit_type = None
-        
+            fruit_type = self.get_fruit_type() if uniform() < fruit_chance else None
         super(TreeFactory, self).__init__(seed, tree_params, child_col=None, trunk_surface=trunk_surface, coarse=coarse, **kwargs)
 
         with FixedSeed(seed):

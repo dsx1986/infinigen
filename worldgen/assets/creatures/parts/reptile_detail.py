@@ -27,8 +27,7 @@ def sigmoid(x):
 def interpolate(coords):
     x = [c[0] for c in coords]
     y = [c[1] for c in coords]
-    f = interp1d(x, y, kind='cubic')
-    return f
+    return interp1d(x, y, kind='cubic')
 def lr_scale(l, r, p):
     p = p * (r - l) + l
     return p
@@ -140,7 +139,7 @@ class nurbs_ReptileTail():
     def get_ctrls(self):
         self.n = int(self.n)
         self.m = int(self.m)
-        ctrls = np.zeros((self.n, self.m, 3)) 
+        ctrls = np.zeros((self.n, self.m, 3))
         for i in range(self.n):
             for j in range(self.m):
                 p = i / (self.n - 1)
@@ -148,13 +147,13 @@ class nurbs_ReptileTail():
                 ctrls[i][j][0] = p
                 ctrls[i][j][1] = self.local_scale(p) * cos(theta)
                 ctrls[i][j][2] = self.local_scale(p) * sin(theta)
-                
+
                 ctrls[i][j][0] *= self.scale_x
                 ctrls[i][j][1] *= self.scale_y
                 ctrls[i][j][2] *= self.scale_z
 
                 if (self.breast > 0.5):
-                    if (0.10 < p and p < 0.25):
+                    if 0.10 < p < 0.25:
                         if abs(sin(theta)) < 0.5:
                             ctrls[i][j][1] *= 40 * (0.1 - abs(0.15 - p)) * (1 - abs(sin(theta)))
                         else:
@@ -190,9 +189,7 @@ class nurbs_ReptileUpperHead():
     
     def local_offset_z(self, p, theta):
         a = sin(theta)
-        if (a > 0.7):
-            return -(a - 0.7) * 0.7
-        return 0
+        return -(a - 0.7) * 0.7 if (a > 0.7) else 0
     
     def init_local_scale_y(self):
         lrp = lambda p: lr_scale(-1/4, 1, p)
@@ -327,9 +324,7 @@ class nurbs_ReptileLowerHead():
     
     def local_offset_z(self, p, theta):
         a = sin(theta)
-        if (a > 0.7):
-            return -(a - 0.7) ** 2 * 0.7
-        return 0
+        return -(a - 0.7) ** 2 * 0.7 if (a > 0.7) else 0
     
     def init_local_scale_y(self):
         lrp = lambda p: lr_scale(-1/4, 1, p)
@@ -337,10 +332,8 @@ class nurbs_ReptileLowerHead():
     
     def init_local_scale_z(self):
         def foo(p, theta):
-            if 0 <= theta and theta <= pi:
-                return sqrt(1 - p ** 2)
-            else:
-                return (1 - p ** 2) / 10 
+            return sqrt(1 - p ** 2) if 0 <= theta and theta <= pi else (1 - p ** 2) / 10
+
         return foo
     
     def update(self, set):
@@ -398,9 +391,7 @@ class nurbs_ReptileHead():
     
     def local_offset_z(self, p, theta):
         a = sin(theta)
-        if (a > 0.7):
-            return -(a - 0.7) * 0.7
-        return 0
+        return -(a - 0.7) * 0.7 if (a > 0.7) else 0
     
     def init_local_scale_y(self):
         lrp = lambda p: lr_scale(-1/2, 1, p)
@@ -505,27 +496,9 @@ class nurbs_LizardFrontLeg():
         
     def init_local_offset_x(self):
         return lambda p, theta: 0
-        alpha = pi * 0.45
-        thred = 0.9
-        def foo(p, theta):
-            offset = 0
-            if (p <= thred):
-                offset += -(1 - cos(alpha)) * (p - thred)
-            offset -= -(1 - cos(alpha)) * (0 - thred)
-            return offset
-        return foo
     
     def init_local_offset_y(self):
         return lambda p, theta: 0
-        alpha = -pi * 0.45
-        thred = 0.9
-        def foo(p, theta):
-            offset = 0
-            if (p <= thred):
-                offset += sin(alpha) * (p - thred)
-            # offset -= sin(alpha) * (0 - thred)
-            return offset
-        return foo
     
     def init_local_scale_y(self):
         th0 = 0.03
@@ -603,27 +576,9 @@ class nurbs_LizardBackLeg():
         
     def init_local_offset_x(self):
         return lambda p, theta: 0
-        alpha = -pi * 0.45
-        thred = 0.9
-        def foo(p, theta):
-            offset = 0
-            if (p <= thred):
-                offset += -(1 - cos(alpha)) * (p - thred)
-            offset -= -(1 - cos(alpha)) * (0 - thred)
-            return offset
-        return foo
     
     def init_local_offset_y(self):
         return lambda p, theta: 0
-        alpha = pi * 0.45
-        thred = 0.9
-        def foo(p, theta):
-            offset = 0
-            if (p <= thred):
-                offset += sin(alpha) * (p - thred)
-            # offset -= sin(alpha) * (0 - thred)
-            return offset
-        return foo
     
     def init_local_scale_y(self):
         th0 = 0.03
@@ -704,10 +659,8 @@ class nurbs_LizardToe():
         
     def init_local_offset_x(self):
         def foo(p, theta):
-            if (p < 0.98):
-                return 0
-            else:
-                return (p - 0.9) * 3
+            return 0 if (p < 0.98) else (p - 0.9) * 3
+
         return foo
     
     def init_local_offset_y(self):
@@ -798,14 +751,11 @@ class nurbs_ReptileBody():
         else:
             head = nurbs_ReptileHead(**self.param_head)
         tail = nurbs_ReptileTail(**self.param_tail)
-        
+
         head_ctrls = head.get_ctrls()
         tail_ctrls = tail.get_ctrls()
-        
-        if self.open_mouth:
-            head_ctrls = self.update(head_ctrls, (1, 0), (0, 0, -0.05))
-        else:
-            head_ctrls = self.update(head_ctrls, (1, 0), (0, 0, -0.05))
+
+        head_ctrls = self.update(head_ctrls, (1, 0), (0, 0, -0.05))
         tail_ctrls = self.update(tail_ctrls, (0, 1))
         self.ctrls = self.merge(head_ctrls, tail_ctrls)
         return self.ctrls

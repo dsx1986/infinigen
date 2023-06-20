@@ -41,7 +41,7 @@ def objects_to_grid(objects, spacing):
 def placeholder_locs(terrain, overall_density, selection, distance_min=0, altitude=0.0, max_locs=None):
     temp_vert = butil.spawn_vert('compute_placeholder_locations')
     geo = temp_vert.modifiers.new(name="GEOMETRY", type='NODES')
-    if geo.node_group == None:
+    if geo.node_group is None:
         group = geometry_node_group_empty_new()
         geo.node_group = group
     nw = NodeWrangler(geo)
@@ -106,7 +106,7 @@ def scatter_placeholders(locations, factory: AssetFactory):
         rot_z = np.random.uniform(0, 2 * np.pi)
         obj = factory.spawn_placeholder(i, loc, mathutils.Euler((0, 0, rot_z)))
         objs.append(obj)
-    col = butil.group_in_collection(objs, 'placeholders:' + repr(factory))
+    col = butil.group_in_collection(objs, f'placeholders:{repr(factory)}')
     factory.finalize_placeholders(objs)
     return col
 
@@ -124,9 +124,7 @@ def get_placeholder_points(obj):
 
 def parse_asset_name(name):
     match = re.fullmatch('(.*)\((\d+)\)\.spawn_(.*)\((\d+)\)', name)
-    if not match:
-        return None, None, None, None
-    return list(match.groups())
+    return (None, None, None, None) if not match else list(match.groups())
     
 def populate_collection(
     factory: AssetFactory, placeholder_col, 

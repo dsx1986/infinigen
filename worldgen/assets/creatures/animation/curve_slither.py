@@ -174,7 +174,7 @@ def add_curve_slithers(curve, snake_length):
 
 def slither_along_path(obj, curve, speed, zoff_pct=0.7, orig_len=None):
 
-    if not curve.type == 'CURVE':
+    if curve.type != 'CURVE':
         with butil.SelectObjects(curve):
             bpy.ops.object.convert(target='CURVE')
             curve = bpy.context.active_object
@@ -184,7 +184,7 @@ def slither_along_path(obj, curve, speed, zoff_pct=0.7, orig_len=None):
             message == f'. {len(curve.data.vertices)=}'
         logging.warning(message)
         return
-    
+
     curve.data.twist_mode = 'Z_UP'
 
     xmax = max(v[0] for v in obj.bound_box)

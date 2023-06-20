@@ -211,10 +211,10 @@ def apply(obj, geo_kwargs=None, shader_kwargs=None, **kwargs):
 
 
 if __name__ == "__main__":
-    for i in range(1):
+    #creature(73349, 0).parts(0, factory=QuadrupedBody)
+    obj = "creature(36230, 0).parts(0, factory=BeetleBody)"
+    for _ in range(1):
         bpy.ops.wm.open_mainfile(filepath='dev_scene_1019.blend')
-        #creature(73349, 0).parts(0, factory=QuadrupedBody)
-        obj = "creature(36230, 0).parts(0, factory=BeetleBody)"
         #obj = "creature(73349, 0).parts(0, factory=QuadrupedBody)"
         apply(bpy.data.objects[obj], geo_kwargs={'rand': True}, shader_kwargs={'rand': True})
         fn = os.path.join(os.path.abspath(os.curdir), 'dev_scene_test_beetle_attr.blend')
