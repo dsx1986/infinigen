@@ -71,7 +71,7 @@ def as_particle_collection(subject, prefix='particleassets'):
     if subject.name.startswith(prefix):
         return subject
 
-    subject.name = prefix + ':' + subject.name.split(':')[-1]
+    subject.name = f'{prefix}:' + subject.name.split(':')[-1]
     for o in subject.objects:
         o.location.z -= 100
     subject.hide_viewport = True

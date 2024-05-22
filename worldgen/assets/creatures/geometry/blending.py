@@ -129,13 +129,13 @@ class Curve2DFactory:
             if knots is None:
                 knots = np.arange(len(ctrlpts) + degree + 1)
             else:
-                knots = knots.append(knots[0:degree])
+                knots = knots.append(knots[:degree])
             if weights is not None:
-                weights = weights.append(weights[0:degree])
+                weights = weights.append(weights[:degree])
         else:
             if knots is None:
                 knots = np.arange(len(ctrlpts) + degree + 1)
-                knots[0:degree] = knots[degree]
+                knots[:degree] = knots[degree]
                 knots[-degree:] = knots[-degree-1]
 
         curve = NURBS.Curve(normalize_kv=False)
@@ -162,7 +162,7 @@ class UVMesh:
             raise ValueError("wrong shape of uvpoints")
 
         uvpoints = uvpoints.reshape(-1, 2)
-        self._uvpoints = [uv for uv in uvpoints]
+        self._uvpoints = list(uvpoints)
         self._uvpoints_deleted = [False] * len(self._uvpoints)
 
         self._edges_of_point = {i: set() for i in range(len(self._uvpoints))}
@@ -177,7 +177,7 @@ class UVMesh:
             (f[j-1], f[j]): i for i, f in enumerate(self._faces) for j in range(0, len(f))}
 
         self._cyclic_v = cyclic_v
-        self._pos_cross_edges = set(((e[0], e[1]) for e in pos_cross_edges))
+        self._pos_cross_edges = {(e[0], e[1]) for e in pos_cross_edges}
         self._domain = domain
 
         self._vspan = domain[1][1] - domain[1][0]
@@ -234,19 +234,31 @@ class UVMesh:
 
     def _enclosing_polygon(self, face_id, pt_coords):
         point = Point(pt_coords)
-        for poly in [self._polygons[face_id], self._polygons_lshift[face_id], self._polygons_rshift[face_id]]:
-            if poly is not None and poly.covers(point):
-                return poly
-        return None
+        return next(
+            (
+                poly
+                for poly in [
+                    self._polygons[face_id],
+                    self._polygons_lshift[face_id],
+                    self._polygons_rshift[face_id],
+                ]
+                if poly is not None and poly.covers(point)
+            ),
+            None,
+        )
 
     def _intersecting_polygons_of_line(self, face_id, line: LineString):
         if line is None:
             return []
-        res = []
-        for poly in [self._polygons[face_id], self._polygons_lshift[face_id], self._polygons_rshift[face_id]]:
-            if poly is not None and poly.covers(line):
-                res.append(poly)
-        return res
+        return [
+            poly
+            for poly in [
+                self._polygons[face_id],
+                self._polygons_lshift[face_id],
+                self._polygons_rshift[face_id],
+            ]
+            if poly is not None and poly.covers(line)
+        ]
 
     def _enclosing_faces_polys_edges_verts_of_point(self, coords):
         if self._cyclic_v:
@@ -260,7 +272,8 @@ class UVMesh:
         e_edges = [(self._faces[f][i], self._faces[f][(i+1) % len(self._faces[f])]) for f, po in e_faces_polys for i in range(len(self._faces[f]))
                    if shapely.geometry.LineString([po.exterior.coords[i], po.exterior.coords[i+1]]).contains(Point(coords))]
         e_edges = list(
-            set(((e[0], e[1]) if e[0] < e[1] else ((e[1], e[0])) for e in e_edges)))
+            {(e[0], e[1]) if e[0] < e[1] else ((e[1], e[0])) for e in e_edges}
+        )
         e_verts = [pt for f, _ in e_faces_polys for pt in self._faces[f] if (
             np.array(coords) == np.array(self._uvpoints[pt])).all()]
         e_verts = list(set(e_verts))
@@ -302,20 +315,20 @@ class UVMesh:
     def _cross_edge_dir(self, e):
         if e in self._pos_cross_edges:
             return 1
-        if (e[1], e[0]) in self._pos_cross_edges:
-            return -1
-        return 0
+        return -1 if (e[1], e[0]) in self._pos_cross_edges else 0
 
     def _get_enclosing_polygon(self, new_pt_coords, enclosing_face):
         p_m = self._polygons[enclosing_face]
         p_l = self._polygons_lshift[enclosing_face]
         p_r = self._polygons_rshift[enclosing_face]
-        p_e = None
-        for p in [p_m, p_l, p_r]:
-            if p is not None and p.covers(Point(new_pt_coords)):
-                p_e = p
-                break
-        return p_e
+        return next(
+            (
+                p
+                for p in [p_m, p_l, p_r]
+                if p is not None and p.covers(Point(new_pt_coords))
+            ),
+            None,
+        )
 
     def _add_face(self, pts):
         f_id = len(self._faces)
@@ -375,9 +388,11 @@ class UVMesh:
         pt_idx = self._faces[enclosing_face].index(pt)
         pt = p_e.exterior.coords[pt_idx]
         pt_poly_co = p_e.exterior.coords[pt_idx]
-        cross_dir = 1 if pt_poly_co[1] < self._domain[1][0] else (
-            -1 if pt_poly_co[1] >= self._domain[1][1] else 0)
-        return cross_dir
+        return (
+            1
+            if pt_poly_co[1] < self._domain[1][0]
+            else (-1 if pt_poly_co[1] >= self._domain[1][1] else 0)
+        )
 
     def _delete_edge_and_merge_faces(self, pt1, pt2):
         f1 = self._face_of_edge.pop((pt1, pt2))
@@ -401,9 +416,9 @@ class UVMesh:
 
     def _delete_point_and_merge_faces(self, pt):
         """delete pt and its edges and faces"""
-        neighbor_pts = [i for i in self._edges_of_point[pt]]
+        neighbor_pts = list(self._edges_of_point[pt])
         faces = [self._face_of_edge[(pt, j)] for j in neighbor_pts]
-        new_f_pts = neighbor_pts[0:1]
+        new_f_pts = neighbor_pts[:1]
         face_count = 0
         while face_count < len(neighbor_pts):
             cur_pt = new_f_pts[-1]
@@ -596,9 +611,9 @@ class UVMesh:
                 self._triangulate_face(self._face_of_edge[(pt2, pt1)])
             return
 
-        shared_f = set(self._faces_of_point(pt1)).intersection(
-            set(self._faces_of_point(pt2)))
-        if len(shared_f) > 0:
+        if shared_f := set(self._faces_of_point(pt1)).intersection(
+            set(self._faces_of_point(pt2))
+        ):
             if len(shared_f) > 1:
                 raise ValueError("non-convex faces or redudant points")
             f1, f2 = self._split_face_with_new_edge(
@@ -658,18 +673,17 @@ class UVMesh:
         if len(e_verts) > 0:
             if len(e_verts) > 1:
                 raise ValueError("cannot have more than 1 e_vert")
-            new_pt = e_verts[0]
+            return e_verts[0]
         elif len(e_edges) > 0:
             if len(e_edges) > 1:
                 raise ValueError("cannot have more than 1 e_edge")
             e = e_edges[0]
-            new_pt = self._split_edge_with_new_point(e[0], e[1], pt_coords)
+            return self._split_edge_with_new_point(e[0], e[1], pt_coords)
         else:
             if len(e_faces_polys) != 1:
                 raise ValueError("must have an enclosing face")
             f, _ = e_faces_polys[0]
-            new_pt = self._split_face_with_new_point(f, pt_coords)
-        return new_pt
+            return self._split_face_with_new_point(f, pt_coords)
 
     def add_line_and_remesh(self, start_coords, end_coords):
         pt1 = self.add_point_and_remesh(self._wrap_around_v(start_coords))
@@ -693,9 +707,8 @@ class UVMesh:
             pt1, pt2 = self.add_line_and_remesh(uvpoints[i], uvpoints[i+1])
             if i == 0:
                 pts.append(pt1)
-            else:
-                if pt1 != pts[-1]:
-                    raise ValueError("numerical issues!")
+            elif pt1 != pts[-1]:
+                raise ValueError("numerical issues!")
             pts.append(pt2)
         if cyclic_curve:
             if vloop:
@@ -736,9 +749,8 @@ class UVMesh:
                 if poly.covers(Point(pt_coords)) or poly.covers(Point(pt_coords1)) or poly.covers(Point(pt_coords2)):
                     if cut_inside:
                         self.remove_points(comp)
-                else:
-                    if cut_outside:
-                        self.remove_points(comp)
+                elif cut_outside:
+                    self.remove_points(comp)
         return pts
 
     def connected_components(self, boundary_pts: Iterable[int]) -> Iterable[Iterable[int]]:
@@ -749,16 +761,19 @@ class UVMesh:
         for i in range(len(color_of_pts)):
             if color_of_pts[i] == -1:
                 stack = [i]
-                while len(stack) > 0:
+                while stack:
                     pt = stack.pop()
                     color_of_pts[pt] = cur_color
-                    for pt2 in self._edges_of_point[pt]:
-                        if color_of_pts[pt2] == -1:
-                            stack.append(pt2)
+                    stack.extend(
+                        pt2
+                        for pt2 in self._edges_of_point[pt]
+                        if color_of_pts[pt2] == -1
+                    )
                 cur_color += 1
-        res = [[i for i, c in enumerate(color_of_pts) if c == color]
-               for color in range(cur_color)]
-        return res
+        return [
+            [i for i, c in enumerate(color_of_pts) if c == color]
+            for color in range(cur_color)
+        ]
 
     def remove_points(self, pts: Iterable[int]):
         for pt in pts:

@@ -45,10 +45,13 @@ def shader_cobblestone(nw: NodeWrangler):
     colorramp.color_ramp.elements[1].position = 1.0
     colorramp.color_ramp.elements[1].color = (roughness_low, roughness_low, roughness_low, 1.0)
 
-    principled_bsdf = nw.new_node(Nodes.PrincipledBSDF,
-        input_kwargs={'Base Color': mix, 'Roughness': colorramp.outputs["Color"]})
-
-    return principled_bsdf
+    return nw.new_node(
+        Nodes.PrincipledBSDF,
+        input_kwargs={
+            'Base Color': mix,
+            'Roughness': colorramp.outputs["Color"],
+        },
+    )
 
 @gin.configurable
 def geo_cobblestone(nw: NodeWrangler, selection=None, random_seed=0, geometry=True):

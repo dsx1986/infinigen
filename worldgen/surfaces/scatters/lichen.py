@@ -38,8 +38,7 @@ class LichenFactory(AssetFactory):
         vertices = np.concatenate(
             [np.stack([np.cos(angles) * r_jitter, np.sin(angles) * r_jitter, z_jitter]).T, np.zeros((1, 3))], 0)
         faces = np.stack([np.arange(n), np.roll(np.arange(n), 1), np.full(n, n)]).T
-        mesh = data2mesh(vertices, [], faces, 'circle')
-        return mesh
+        return data2mesh(vertices, [], faces, 'circle')
 
     @staticmethod
     def shader_lichen(nw: NodeWrangler, base_hue=.2, **params):
@@ -108,10 +107,12 @@ class Lichen:
 
     def apply(self, obj, selection=None):
 
-        scatter_obj = scatter_instances(
-            base_obj=obj, collection=self.col, 
-            density=5e3,  min_spacing=.08, 
-            scale=1, scale_rand=N(0.5, 0.07),
-            selection=selection
+        return scatter_instances(
+            base_obj=obj,
+            collection=self.col,
+            density=5e3,
+            min_spacing=0.08,
+            scale=1,
+            scale_rand=N(0.5, 0.07),
+            selection=selection,
         )
-        return scatter_obj

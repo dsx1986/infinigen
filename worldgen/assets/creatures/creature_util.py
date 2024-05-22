@@ -29,7 +29,7 @@ def interp_dict(a: dict, b: dict, t: float, keys='assert', fill=0, recurse=True,
         keys = 'b' if t > 0.5 else 'a'
 
     if keys == 'assert':
-        if not a.keys() == b.keys():
+        if a.keys() != b.keys():
             raise ValueError(f'lerp_dict(..., {keys=}) recieved {a.keys()=}, {b.keys()}=')
         out_keys = a.keys()
     elif keys == 'a':
@@ -51,7 +51,7 @@ def interp_dict(a: dict, b: dict, t: float, keys='assert', fill=0, recurse=True,
             res[k] = b[k]
         elif recurse and isinstance(a[k], dict):
             res[k] = interp_dict(a[k], b[k], t, keys=keys, fill=fill, recurse=recurse, lerp=lerp)
-        elif isinstance(a[k], numbers.Number) or isinstance(a[k], np.ndarray):
+        elif isinstance(a[k], (numbers.Number, np.ndarray)):
             res[k] = lerp(a[k], b[k], t)
         else:
             raise TypeError(f'interp_dict could not handle {type(a[k])=}')
@@ -88,8 +88,10 @@ def offset_center(obj, x=True, z=True):
     # find all bbox corners
     vs = []
     for ob in butil.iter_object_tree(obj):
-        for corner in ob.bound_box:
-            vs.append(ob.matrix_world @ mathutils.Vector(corner))
+        vs.extend(
+            ob.matrix_world @ mathutils.Vector(corner)
+            for corner in ob.bound_box
+        )
     vs = np.array(vs)
 
     # offset to center x and align z to floor

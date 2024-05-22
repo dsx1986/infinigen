@@ -52,7 +52,7 @@ class Curve:
                 polyline.points.add(1)
             polyline.points[-1].co = get_pos(p)
 
-            end = ((i == 0) or (i == len(self.points) - 1)) and not self.closed
+            end = i in [0, len(self.points) - 1] and not self.closed
             sharp = self.sharp is not None and self.sharp[i]
             if end or sharp:
                 polyline.points.add(1)
@@ -89,7 +89,7 @@ class Curve:
                     if o is not None:
                         o.select_set(True)
                 bpy.ops.object.delete(use_global=False, confirm=False)
-                
+
                 self.profile = None
                 self.taper = None
 

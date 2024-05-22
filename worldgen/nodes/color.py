@@ -130,7 +130,7 @@ HSV_RANGES = {
 }
 
 def color_category(name):
-    if not name in HSV_RANGES:
+    if name not in HSV_RANGES:
         raise ValueError(f'color_category did not recognize {name=}, options are {HSV_RANGES.keys()=}')
     schemes = HSV_RANGES[name]
     assert len(schemes) == 3

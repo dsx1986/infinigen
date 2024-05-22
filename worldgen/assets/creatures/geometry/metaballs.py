@@ -26,18 +26,18 @@ class MBallStructure:
 
     def empty_elt(self, pos, rot, scale):
 
-        mball = bpy.data.metaballs.new(self.name + '_mball')
+        mball = bpy.data.metaballs.new(f'{self.name}_mball')
         mball.resolution = self.resolution
         mball.render_resolution = self.resolution
-        
-        mball_obj = bpy.data.objects.new(self.name + '_element', mball)
+
+        mball_obj = bpy.data.objects.new(f'{self.name}_element', mball)
         bpy.context.view_layer.active_layer_collection.collection.objects.link(mball_obj)
-        
+
         mball_obj.parent = self.root
         mball_obj.location = pos
         mball_obj.rotation_euler = rot.to_euler()
         mball_obj.scale = scale 
-        
+
         return mball_obj
 
     def apply_flags(self, ele, flags):
@@ -56,12 +56,7 @@ class MBallStructure:
         ele = mball_obj.data.elements.new()
         ele.type = 'ELLIPSOID'
 
-        if mode == 'sizes':
-            ele.size_x = length 
-            ele.size_y = rad
-            ele.size_z = rad
-            ele.radius = 1 # this seems to just scale everything up/down, no need
-        elif mode == 'scale':
+        if mode == 'scale':
             mball_obj.scale.x *= length
             mball_obj.scale.y *= rad
             mball_obj.scale.z *= rad
@@ -71,6 +66,11 @@ class MBallStructure:
             ele.size_y = 1
             ele.size_z = 1
 
+        elif mode == 'sizes':
+            ele.size_x = length
+            ele.size_y = rad
+            ele.size_z = rad
+            ele.radius = 1 # this seems to just scale everything up/down, no need
         self.apply_flags(ele, flags)
 
         return mball_obj
@@ -94,14 +94,14 @@ class MBallStructure:
     def to_object(self):
 
         bm = bmesh.new()
-            
+
         mball_obj = self.root.children[0]
-        
+
         if len(self.root.children) > 1:    
             first = self.root.children[1]
             mball_obj.location = first.location
             mball_obj.rotation_euler = first.rotation_euler
-            
+
             # do resolution via scale, not using their settings
             for c in self.root.children:
                 c.data.resolution = 1
@@ -114,7 +114,7 @@ class MBallStructure:
         mesh = bpy.data.meshes.new(self.name)
         bm.to_mesh(mesh)
 
-        obj = bpy.data.objects.new(self.name + '_mesh', object_data=mesh)
+        obj = bpy.data.objects.new(f'{self.name}_mesh', object_data=mesh)
         bpy.context.scene.collection.objects.link(obj)
 
         if len(self.root.children) > 1:

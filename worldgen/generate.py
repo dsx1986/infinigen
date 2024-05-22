@@ -95,6 +95,7 @@ def compose_scene(output_folder, terrain, scene_seed, **params):
             'select_scale': uniform(0.03, 0.3)
         }
         return [tree_params() for _ in range(n_tree_species)]
+
     tree_species_params = p.run_stage('forest_params', choose_forest_params, use_chance=False)
 
     def add_trees(terrain_mesh):
@@ -103,6 +104,7 @@ def compose_scene(output_folder, terrain, scene_seed, **params):
             selection = density.placement_mask(params['select_scale'], tag=land_domain)
             placement.scatter_placeholders_mesh(terrain_mesh, fac, selection=selection, altitude=-0.1,
                 overall_density=params['density'], distance_min=params['distance_min'])
+
     p.run_stage('trees', add_trees, terrain_mesh)
 
     def add_bushes(terrain_mesh):
@@ -115,11 +117,13 @@ def compose_scene(output_folder, terrain, scene_seed, **params):
             placement.scatter_placeholders_mesh(terrain_mesh, fac, altitude=-0.05,
                 overall_density=spec_density, distance_min=uniform(0.05, 0.3),
                 selection=selection)
+
     p.run_stage('bushes', add_bushes, terrain_mesh)
 
     def add_clouds(terrain_mesh):
         cloud_factory = CloudFactory(int_hash((scene_seed, 0)), coarse=True, terrain_mesh=terrain_mesh)
         placement.scatter_placeholders(cloud_factory.spawn_locations(), cloud_factory)
+
     p.run_stage('clouds', add_clouds, terrain_mesh)
 
     def add_boulders(terrain_mesh):
@@ -130,6 +134,7 @@ def compose_scene(output_folder, terrain, scene_seed, **params):
             placement.scatter_placeholders_mesh(terrain_mesh, fac, 
                 overall_density=params.get("boulder_density", uniform(.02, .05)) / n_boulder_species,
                 selection=selection, altitude=-0.25)
+
     p.run_stage('boulders', add_boulders, terrain_mesh)
 
     def add_glowing_rocks(terrain_mesh):
@@ -137,6 +142,7 @@ def compose_scene(output_folder, terrain, scene_seed, **params):
         fac = GlowingRocksFactory(int_hash((scene_seed, 0)), coarse=True)
         placement.scatter_placeholders_mesh(terrain_mesh, fac,
             overall_density=params.get("glow_rock_density", 0.025), selection=selection)
+
     p.run_stage('glowing_rocks', add_glowing_rocks, terrain_mesh)
 
     def add_kelp(terrain_mesh):
@@ -145,6 +151,7 @@ def compose_scene(output_folder, terrain, scene_seed, **params):
         placement.scatter_placeholders_mesh(terrain_mesh, fac, altitude=-0.05,
             overall_density=params.get('kelp_density', uniform(.2, 1)),
             selection=selection, distance_min=3)
+
     p.run_stage('kelp', add_kelp, terrain_mesh)
 
     def add_cactus(terrain_mesh):
@@ -155,17 +162,19 @@ def compose_scene(output_folder, terrain, scene_seed, **params):
             placement.scatter_placeholders_mesh(terrain_mesh, fac, altitude=-0.05,
                 overall_density=params.get('cactus_density', uniform(.02, .1) / n_cactus_species),
                 selection=selection, distance_min=1)
+
     p.run_stage('cactus', add_cactus, terrain_mesh)
 
     def camera_preprocess():
         camera_rigs = cam_util.spawn_camera_rigs()
         scene_bvhtrees = cam_util.camera_selection_preprocessing(terrain)   
-        return camera_rigs, scene_bvhtrees 
+        return camera_rigs, scene_bvhtrees
+
     camera_rigs, scene_bvhtrees = p.run_stage('camera_preprocess', camera_preprocess, use_chance=False)
     p.run_stage('pose_cameras', lambda: cam_util.configure_cameras(
         camera_rigs, scene_bvhtrees, terrain), use_chance=False)
     cam = cam_util.get_camera(0, 0)
-    
+
     p.run_stage('lighting', lighting.add_lighting, cam, use_chance=False)
     # determine a small area of the terrain for the creatures to run around on
     # must happen before camera is animated, as camera may want to follow them around
@@ -174,7 +183,7 @@ def compose_scene(output_folder, terrain, scene_seed, **params):
             hide_render=True, suffix='center')
     deps = bpy.context.evaluated_depsgraph_get()
     terrain_center_bvh = mathutils.bvhtree.BVHTree.FromObject(terrain_center, deps)
-    
+
     pois = [] # objects / points of interest, for the camera to look at
 
     def add_ground_creatures(target):
@@ -184,6 +193,7 @@ def compose_scene(output_folder, terrain, scene_seed, **params):
         selection = density.placement_mask(select_thresh=0, tag='beach', altitude_range=(-0.5, 0.5)) if fac_class is CrabFactory else 1
         col = placement.scatter_placeholders_mesh(target, fac, num_placeholders=n, overall_density=1, selection=selection, altitude=0.2)
         return list(col.objects)
+
     pois += p.run_stage('ground_creatures', add_ground_creatures, target=terrain_center, default=[])
 
     def flying_creatures():
@@ -192,6 +202,7 @@ def compose_scene(output_folder, terrain, scene_seed, **params):
         n = params.get('max_flying_creatures', randint(2, 7))
         col = placement.scatter_placeholders_mesh(terrain_center, fac, num_placeholders=n, overall_density=1, altitude=0.2)
         return list(col.objects)
+
     pois += p.run_stage('flying_creatures', flying_creatures, default=[])
 
     p.run_stage('animate_cameras', lambda: cam_util.animate_cameras(
@@ -204,7 +215,7 @@ def compose_scene(output_folder, terrain, scene_seed, **params):
             cam=cam, vis_margin=2, dist_max=params['near_distance'], hide_render=True, suffix='near')
 
         collider = butil.modify_mesh(butil.deep_clone_obj(terrain_near), 'COLLISION', apply=False, show_viewport=True)
-        collider.name = collider.name + '.collider'
+        collider.name = f'{collider.name}.collider'
         collider.collision.use_culling = False
         collider_col = butil.get_collection('colliders')
         butil.put_in_collection(collider, collider_col)
@@ -224,6 +235,7 @@ def compose_scene(output_folder, terrain, scene_seed, **params):
             col = placement.scatter_placeholders_mesh(terrain_near, fac, selection=selection,
                 overall_density=1, num_placeholders=1, altitude=2)
             placement.populate_collection(fac, col)
+
     p.run_stage('fish_school', add_fish_school, default=[])
 
     def add_bug_swarm():
@@ -233,6 +245,7 @@ def compose_scene(output_folder, terrain, scene_seed, **params):
         col = placement.scatter_placeholders_mesh(terrain_inview, fac, 
             selection=selection, overall_density=1, num_placeholders=n, altitude=2)
         placement.populate_collection(fac, col)
+
     p.run_stage('bug_swarm', add_bug_swarm)
 
     def add_rocks(target):
@@ -240,23 +253,27 @@ def compose_scene(output_folder, terrain, scene_seed, **params):
             normal_thresh=0.7, return_scalar=True, tag=nonliving_domain)
         _, rock_col = surfaces.scatters.rocks.apply(target, selection=selection)
         return rock_col
+
     p.run_stage('rocks', add_rocks, terrain_inview)
 
     def add_ground_leaves(target):
         selection = density.placement_mask(scale=0.1, select_thresh=0.52, normal_thresh=0.7, return_scalar=True, tag=land_domain)
         surfaces.scatters.ground_leaves.apply(target, selection=selection, season=season)
+
     p.run_stage('ground_leaves', add_ground_leaves, terrain_near, prereq='trees')
-                
+
     def add_ground_twigs(target):
         use_leaves = uniform() < 0.5
         selection = density.placement_mask(scale=0.15, select_thresh=0.55, normal_thresh=0.7, return_scalar=True, tag=nonliving_domain)
         surfaces.scatters.ground_twigs.apply(target, selection=selection, use_leaves=use_leaves)
+
     p.run_stage('ground_twigs', add_ground_twigs, terrain_near)
 
     def add_chopped_trees(target):
         selection = density.placement_mask(scale=0.15, select_thresh=uniform(0.55, 0.6), 
                                            normal_thresh=0.7, return_scalar=True, tag=nonliving_domain)
         surfaces.scatters.chopped_trees.apply(target, selection=selection)
+
     p.run_stage('chopped_trees', add_chopped_trees, terrain_inview)
 
     def add_grass(target):
@@ -265,6 +282,7 @@ def compose_scene(output_folder, terrain, scene_seed, **params):
             normal_dir=(0, 0, 1), scale=0.1, tag=land_domain,
             return_scalar=True, select_thresh=uniform(select_max/2, select_max))
         surfaces.scatters.grass.apply(target, selection=selection)
+
     p.run_stage('grass', add_grass, terrain_inview)
 
     def add_monocots(target):
@@ -275,18 +293,21 @@ def compose_scene(output_folder, terrain, scene_seed, **params):
             normal_dir=(0, 0, 1), scale=0.2, select_thresh=0.55,
             tag=params.get("grass_habitats", None))
         surfaces.scatters.monocot.apply(target, grass=False, selection=selection)
+
     p.run_stage('monocots', add_monocots, terrain_inview)
 
     def add_ferns(target):
         selection = density.placement_mask(normal_dir=(0, 0, 1), scale=0.1, 
                     select_thresh=0.6, return_scalar=True, tag=land_domain)
         surfaces.scatters.fern.apply(target, selection=selection)
+
     p.run_stage('ferns', add_ferns, terrain_inview)
 
     def add_flowers(target):
         selection = density.placement_mask(normal_dir=(0, 0, 1), scale=0.01,
             select_thresh=0.6, return_scalar=True, tag=land_domain)
         surfaces.scatters.flowerplant.apply(target, selection=selection)
+
     p.run_stage('flowers', add_flowers, terrain_inview)
 
     def add_corals(target):
@@ -296,6 +317,7 @@ def compose_scene(output_folder, terrain, scene_seed, **params):
         horizontal_faces = density.placement_mask(scale=.15, normal_thresh=-.4, normal_thresh_high=.4)
         coral_reef.apply(target, selection=horizontal_faces, n=5, horizontal=True, tag=underwater_domain,
                          density=params.get('horizontal_coral_density', 2.5))
+
     p.run_stage('corals', add_corals, terrain_inview)
 
     p.run_stage('mushroom', lambda: surfaces.scatters.ground_mushroom.Mushrooms().apply(terrain_near,
@@ -308,7 +330,7 @@ def compose_scene(output_folder, terrain, scene_seed, **params):
         selection=density.placement_mask(scale=0.05, select_thresh=.5, tag=underwater_domain)))
     p.run_stage('jellyfish', lambda: jellyfish.apply(terrain_inview,
         selection=density.placement_mask(scale=0.05, select_thresh=.5, tag=underwater_domain)))
-    
+
     p.run_stage('seashells', lambda: surfaces.scatters.seashells.apply(terrain_near,
         selection=density.placement_mask(scale=0.05, select_thresh=.5, tag='landscape,', return_scalar=True)))
     p.run_stage('pinecone', lambda: surfaces.scatters.pinecone.apply(terrain_near,
@@ -327,21 +349,25 @@ def compose_scene(output_folder, terrain, scene_seed, **params):
             emitter=butil.spawn_plane(location=emitter_off, size=60),
             subject=random_leaf_collection(n=5, season=season),
             settings=particles.falling_leaf_settings())
+
     def add_rain_particles():
         return particles.particle_system(
             emitter=butil.spawn_plane(location=emitter_off, size=30),
             subject=make_asset_collection(particle_assets.RaindropFactory(scene_seed), 5),
             settings=particles.rain_settings())
+
     def add_dust_particles():
         return particles.particle_system(
             emitter=butil.spawn_cube(location=Vector(), size=30),
             subject=make_asset_collection(particle_assets.DustMoteFactory(scene_seed), 5),
             settings=particles.floating_dust_settings())
+
     def add_marine_snow_particles():
         return particles.particle_system(
             emitter=butil.spawn_cube(location=Vector(), size=30),
             subject=make_asset_collection(particle_assets.DustMoteFactory(scene_seed), 5),
             settings=particles.marine_snow_setting())
+
     def add_snow_particles():
         return particles.particle_system(
             emitter=butil.spawn_plane(location=emitter_off, size=60),
@@ -357,7 +383,7 @@ def compose_scene(output_folder, terrain, scene_seed, **params):
     ]
 
     for emitter, system in filter(lambda s: s is not None, particle_systems):
-        with Timer(f"Baking particle system"):
+        with Timer("Baking particle system"):
             butil.constrain_object(emitter, "COPY_LOCATION", use_offset=True, target=cam.parent)
             particles.bake(emitter, system)
         butil.put_in_collection(emitter, butil.get_collection('particles'))

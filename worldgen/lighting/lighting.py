@@ -58,12 +58,7 @@ def nishita_lighting(
 def add_lighting(cam=None):
     nw = NodeWrangler(bpy.context.scene.world.node_tree)
 
-    if True:
-        surface = nishita_lighting(nw, cam)
-    else:
-        # TODO more options
-        surface = None
-
+    surface = nishita_lighting(nw, cam)
     volume = None
 
     nw.new_node(Nodes.WorldOutput, input_kwargs={

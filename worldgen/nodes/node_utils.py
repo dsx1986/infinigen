@@ -46,11 +46,10 @@ def to_nodegroup(name, singleton, type='GeometryNodeTree'):
         def init_fn(*args, **kwargs):
             if singleton and name in bpy.data.node_groups:
                 return bpy.data.node_groups[name]
-            else:
-                ng = bpy.data.node_groups.new(name, type)
-                nw = NodeWrangler(ng)
-                fn(nw, *args, **kwargs)
-                return ng
+            ng = bpy.data.node_groups.new(name, type)
+            nw = NodeWrangler(ng)
+            fn(nw, *args, **kwargs)
+            return ng
 
         return init_fn
 

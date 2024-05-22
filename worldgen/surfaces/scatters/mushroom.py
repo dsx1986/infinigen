@@ -86,7 +86,9 @@ def apply(objs, selection=None, **kwargs):
             objs.parent = scatter_obj
         scattered_objects.append(scatter_obj)
 
-    col = butil.group_in_collection(base_mushrooms, name=f'assets:base_mushroom', reuse=False)
+    col = butil.group_in_collection(
+        base_mushrooms, name='assets:base_mushroom', reuse=False
+    )
     col.hide_viewport = True
     col.hide_render = True
     return scattered_objects, col

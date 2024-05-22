@@ -46,7 +46,10 @@ def remove_translucency():
                 assert shader_2_soc.is_linked and len(shader_2_soc.links) == 1
                 shader_1_type = shader_1_soc.links[0].from_node.bl_idname
                 shader_2_type = shader_2_soc.links[0].from_node.bl_idname
-                assert not (shader_1_type in TRANSPARENT_SHADERS and shader_2_type in TRANSPARENT_SHADERS)
+                assert (
+                    shader_1_type not in TRANSPARENT_SHADERS
+                    or shader_2_type not in TRANSPARENT_SHADERS
+                )
                 if shader_1_type in TRANSPARENT_SHADERS:
                     assert not fac_soc.is_linked
                     fac_soc.default_value = 1.0
@@ -108,7 +111,7 @@ def enable_gpu(engine_name = 'CYCLES'):
         for device in preferences.devices:
             if device.type == gpu_type and (compute_device_type is None or compute_device_type == gpu_type):
                 bpy.context.preferences.addons['cycles'].preferences.compute_device_type = gpu_type
-                logger.info('Device {} of type {} found and used.'.format(device.name, device.type))
+                logger.info(f'Device {device.name} of type {device.type} found and used.')
                 found = True
                 break
         if found:
@@ -250,17 +253,17 @@ def render_image(
     for exclude in excludes:
         bpy.data.objects[exclude].hide_render = True
 
-    with Timer(f"Enable GPU"):
+    with Timer("Enable GPU"):
         devices = enable_gpu()
 
-    with Timer(f"Render/Cycles settings"):
+    with Timer("Render/Cycles settings"):
         if motion_blur: bpy.context.scene.cycles.motion_blur_position = 'START'
 
         bpy.context.scene.cycles.samples = num_samples # i.e. infinity
         bpy.context.scene.cycles.adaptive_min_samples = min_samples
         bpy.context.scene.cycles.adaptive_threshold = adaptive_threshold # i.e. noise threshold
         bpy.context.scene.cycles.time_limit = time_limit
-    
+
         bpy.context.scene.cycles.film_exposure = exposure
         bpy.context.scene.render.use_motion_blur = motion_blur
         bpy.context.scene.render.motion_blur_shutter = motion_blur_shutter
@@ -283,7 +286,7 @@ def render_image(
             global_flat_shading()
 
 
-    with Timer(f"Compositing Setup"):
+    with Timer("Compositing Setup"):
         if not bpy.context.scene.use_nodes:
             bpy.context.scene.use_nodes = True
             compositor_node_tree = bpy.context.scene.node_tree
@@ -306,7 +309,7 @@ def render_image(
     for file_slot in compositor_nodes:
         file_slot.path = f"{file_slot.path}####_{camera_rig_id:02d}_{subcam_id:02d}"
 
-    with Timer(f"get_camera"):
+    with Timer("get_camera"):
         camera = cam_util.get_camera(camera_rig_id, subcam_id)
         if use_dof == 'IF_TARGET_SET':
             use_dof = camera.data.dof.focus_object is not None
@@ -320,11 +323,11 @@ def render_image(
 
     # Render the scene
     bpy.context.scene.camera = camera
-    with Timer(f"Actual rendering"):
+    with Timer("Actual rendering"):
         bpy.ops.render.render(animation=True)
 
     if flat_shading:
-        with Timer(f"Post Processing"):
+        with Timer("Post Processing"):
             for frame in range(bpy.context.scene.frame_start, bpy.context.scene.frame_end + 1):
                 bpy.context.scene.frame_set(frame)
 

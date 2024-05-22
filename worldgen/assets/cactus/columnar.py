@@ -60,13 +60,17 @@ class ColumnarBaseCactusFactory(BaseCactusFactory):
             },
             'children': []
         }
-        major_config = {
+        return {
             'n': 1,
-            'path_kargs': lambda idx: {'n_pts': n_major, 'std': .4, 'momentum': .99, 'sz': .3},
+            'path_kargs': lambda idx: {
+                'n_pts': n_major,
+                'std': 0.4,
+                'momentum': 0.99,
+                'sz': 0.3,
+            },
             'spawn_kargs': lambda idx: {'init_vec': [0, 0, 1]},
-            'children': [minor_config]
+            'children': [minor_config],
         }
-        return major_config
 
     def create_asset(self, face_size=.01, **params) -> bpy.types.Object:
         resolution = 16

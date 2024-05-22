@@ -16,11 +16,11 @@ from surfaces.scatters.chopped_trees import approx_settle_transform
 
 def apply(obj, n=5, selection=None):
     n_species = np.random.randint(2, 3)
-    factories = [PineconeFactory(np.random.randint(1e5)) for i in range(n_species)]
+    factories = [PineconeFactory(np.random.randint(1e5)) for _ in range(n_species)]
     pinecones = make_asset_collection(
         factories, n=n, verbose=True,
         weights=np.random.uniform(0.5, 1, len(factories)))
-    
+
     for o in pinecones.objects:
         approx_settle_transform(o, samples=30)
 

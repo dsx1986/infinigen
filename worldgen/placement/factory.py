@@ -96,7 +96,7 @@ class AssetFactory:
             distance = detail.scatter_res_distance()
 
         if self.coarse:
-            raise ValueError(f'Attempted to spawn_asset() on an AssetFactory(coarse=True)')
+            raise ValueError('Attempted to spawn_asset() on an AssetFactory(coarse=True)')
 
         if placeholder is None:
             placeholder = self.spawn_placeholder(i=i, loc=loc, rot=rot)
@@ -116,12 +116,11 @@ class AssetFactory:
         obj.name = f'{repr(self)}.spawn_asset({i})'
 
         if keep_placeholder:
-            if obj is not placeholder:
-                if obj.parent is None:
-                    butil.parent_to(obj, placeholder, no_inverse=True)
-            else:
+            if obj is placeholder:
                 obj.hide_render = False
-            
+
+            elif obj.parent is None:
+                butil.parent_to(obj, placeholder, no_inverse=True)
         else:
             obj.parent = None
             obj.location = placeholder.location
@@ -151,7 +150,7 @@ def make_asset_collection(spawn_fns, n, name=None, weights=None, as_list=False, 
         fn_idx = np.random.choice(np.arange(len(spawn_fns)), p=weights)
         obj = spawn_fns[fn_idx](i=i, **kwargs)
         objs[fn_idx].append(obj)
-    
+
     for os, f in zip(objs, spawn_fns):
         if hasattr(f, 'finalize_assets'):
             f.finalize_assets(os)
@@ -160,8 +159,7 @@ def make_asset_collection(spawn_fns, n, name=None, weights=None, as_list=False, 
 
     if as_list:
         return objs
-    else:
-        col = butil.group_in_collection(objs, name=f'assets:{name}', reuse=False)
-        col.hide_viewport = True
-        col.hide_render = True
-        return col
+    col = butil.group_in_collection(objs, name=f'assets:{name}', reuse=False)
+    col.hide_viewport = True
+    col.hide_render = True
+    return col

@@ -447,13 +447,15 @@ class LeafFactoryGinko(AssetFactory):
             t = uniform(0.0, 1.0)
 
             # self.blade_color = hsv2rgba([0.125 + 0.16 * factory_seed / 10, 0.95, 0.6])
-            
-            if season=='autumn':
+
+            if (
+                season == 'autumn'
+                or season not in ['summer', 'spring']
+                and season == 'winter'
+            ):
                 self.blade_color = [uniform(0.125, 0.2), 0.95, 0.6]
-            elif season=='summer' or season=='spring':
+            elif season in ['summer', 'spring']:
                 self.blade_color = [uniform(0.25, 0.3), 0.95, 0.6]
-            elif season=='winter':
-                self.blade_color = [uniform(0.125, 0.2), 0.95, 0.6]
             else:
                 raise NotImplementedError
 

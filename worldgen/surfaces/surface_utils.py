@@ -70,8 +70,7 @@ def nodegroup_norm_vec(nw: NodeWrangler):
 
 def sample_range(x_min, x_max):
     y = random.random()
-    y = y * (x_max - x_min) + x_min
-    return y
+    return y * (x_max - x_min) + x_min
 
 
 def sample_ratio(x, sample_min=0.5, sample_max=2):
@@ -134,8 +133,8 @@ def geo_voronoi_noise(nw, rand=False, **input_kwargs):
     noise_texture = nw.new_node(Nodes.NoiseTexture,
                                 input_kwargs={'Vector': vector_math.outputs["Vector"], 'Scale': 10.0})
     if rand:
-        sample_max = input_kwargs['noise_scale_max'] if 'noise_scale_max' in input_kwargs else 3
-        sample_min = input_kwargs['noise_scale_min'] if 'noise_scale_min' in input_kwargs else 1 / sample_max
+        sample_max = input_kwargs.get('noise_scale_max', 3)
+        sample_min = input_kwargs.get('noise_scale_min', 1 / sample_max)
         noise_texture.inputs["Scale"].default_value = sample_ratio(noise_texture.inputs["Scale"].default_value,
                                                                    sample_min, sample_max)
 
@@ -147,9 +146,8 @@ def geo_voronoi_noise(nw, rand=False, **input_kwargs):
     voronoi_texture = nw.new_node(Nodes.VoronoiTexture, input_kwargs={'Vector': mix},
                                   attrs={'voronoi_dimensions': '4D'})
     if rand:
-        sample_max = input_kwargs['voronoi_scale_max'] if 'voronoi_scale_max' in input_kwargs else 3
-        sample_min = input_kwargs[
-            'voronoi_scale_min'] if 'voronoi_scale_min' in input_kwargs else 1 / sample_max
+        sample_max = input_kwargs.get('voronoi_scale_max', 3)
+        sample_min = input_kwargs.get('voronoi_scale_min', 1 / sample_max)
         voronoi_texture.inputs["Scale"].default_value = sample_ratio(
             voronoi_texture.inputs["Scale"].default_value, sample_min, sample_max)
         voronoi_texture.inputs['W'].default_value = sample_range(-5, 5)

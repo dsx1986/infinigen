@@ -119,7 +119,7 @@ def animate_run(root, arma, targets, steps_per_sec=0.7, body=True, motion=True, 
     spread = clip_gaussian(0.15, 0.1, 0, 0.5)
     stride_height = U(0.15, 0.3)
     body_height = stride_height * clip_gaussian(0.6, 0.4, 0.3, 1.2)
-    
+
     base_offset = U(0, 1)
     offset = U(0.5, 0.7)
 
@@ -129,7 +129,7 @@ def animate_run(root, arma, targets, steps_per_sec=0.7, body=True, motion=True, 
 
     feet_targets = get_targets('foot')
 
-    foot_paths = []    
+    foot_paths = []
     foot_paths += follow_gait_path(targets=feet_targets[:2], period=frame_period,
         path_dims=(stride_length, stride_height, 0.0, 0.0), offset=base_offset, spread=spread)
     foot_paths += follow_gait_path(targets=feet_targets[2:], period=frame_period,
@@ -140,7 +140,7 @@ def animate_run(root, arma, targets, steps_per_sec=0.7, body=True, motion=True, 
         p.parent = root
 
     feet_targets = get_targets('knee')
-    knee_paths = []    
+    knee_paths = []
     knee_paths += follow_gait_path(targets=feet_targets[:2], period=frame_period,
         path_dims=(0.1 * stride_length, 0.1 * stride_height, 0.0, 0.0), offset=base_offset, spread=spread)
     knee_paths += follow_gait_path(targets=feet_targets[2:], period=frame_period,
@@ -148,7 +148,7 @@ def animate_run(root, arma, targets, steps_per_sec=0.7, body=True, motion=True, 
     for p in knee_paths:
         p.location.z = -0.1
         p.parent = root
-    
+
     body_paths = []
     if body:
         body_paths += follow_gait_path(targets=get_targets('body_0'), period=frame_period,
@@ -162,9 +162,14 @@ def animate_run(root, arma, targets, steps_per_sec=0.7, body=True, motion=True, 
 
     flap_height = U(0.3, 1)
     flap_speed_mult = 1 #uniform(0.7, 2)
-    body_paths += follow_gait_path(targets=get_targets('wingtip'), period=int(frame_period/flap_speed_mult),
-        path_dims=(0, flap_height, 0.0, flap_height), offset=base_offset+offset, spread=0)
-    
+    body_paths += follow_gait_path(
+        targets=get_targets('wingtip'),
+        period=frame_period // flap_speed_mult,
+        path_dims=(0, flap_height, 0.0, flap_height),
+        offset=base_offset + offset,
+        spread=0,
+    )
+
     for p in body_paths:
         if len(foot_paths):
             p.location.z = (1 - squash_gait_pct) * p.location.z + squash_gait_pct * foot_paths[0].location.z

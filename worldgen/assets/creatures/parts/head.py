@@ -460,7 +460,7 @@ class CarnivoreHead(PartFactory):
             v *= N(1, 0.05, len(v))
             params[k] = v
 
-        params.update(muscle_params)
+        params |= muscle_params
         params['EyeRad'] = 0.023 * N(1, 0.3)
         params['EyeOffset'] = np.array((-0.25, 0.45, 0.3)) + N(0, (0, 0.02, 0.03))
 

@@ -84,7 +84,7 @@ def dinosaur():
     # neck = genome.part(neck_fac)
     # genome.attach(neck, body, coord=(0.1, 0, 0.2), joint=Joint(rest=(180, 180, 0)), rotation_basis='global', bridge_rad=0.2, smooth_rad=0.1)
 
-    
+
     # head_size = {
     #     'scale_x': 0.8 + N(0, 0.02),
     #     'scale_y': 0.3 + N(0, 0.02),
@@ -116,11 +116,11 @@ def dinosaur():
     return genome.CreatureGenome(
         parts=body,
         postprocess_params=dict(
-            animation=dict(), 
+            animation={},
             surface_registry=[
                 (surfaces.templates.snake_scale, 1),
-            ]
-        ) 
+            ],
+        ),
     )
 
 def lizard_genome():
@@ -408,16 +408,12 @@ class LizardFactory(AssetFactory):
     def create_asset(self, i, animate=False, rigging=False, cloth=False, **kwargs):    
         genome = lizard_genome()
         root, parts = creature.genome_to_creature(genome, name=f'lizard({self.factory_seed}, {i})')
-        
+
         joined, extras, arma, ik_targets = creature_gen.join_and_rig_parts(root, parts, genome,
             postprocess_func=reptile_postprocessing, adapt_mode='remesh', rigging=rigging, **kwargs)
-        if animate and arma is not None:
-            pass 
-        if simulate:
-            pass
-        else:
+        if not simulate:
             joined = butil.join_objects([joined] + extras)
-            
+
         return root
     
 @gin.configurable
@@ -433,16 +429,12 @@ class FrogFactory(AssetFactory):
         
         genome = frog_genome()
         root, parts = creature.genome_to_creature(genome, name=f'frog({self.factory_seed}, {i})')
-        
+
         joined, extras, arma, ik_targets = creature_gen.join_and_rig_parts(root, parts, genome,
             postprocess_func=reptile_postprocessing, adapt_mode='remesh', rigging=rigging, **kwargs)
-        if animate and arma is not None:
-            pass 
-        if simulate:
-            pass
-        else:
+        if not simulate:
             joined = butil.join_objects([joined] + extras)
-            
+
         return root
     
 @gin.configurable

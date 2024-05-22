@@ -35,17 +35,14 @@ def intersect_line_seg(line, seg):
     v1, v2 = seg
     line_start, line_dir = line
     res = geometry.intersect_line_line(line_start, line_start + line_dir, v1, v2)
-    
+
     if res is None:
         return None, None
-    
+
     lp, vp = res
 
     t = invert_line((v1, v2 - v1), vp)
-    if t < 0 or t > 1:
-        return None, None
-
-    return lp, vp
+    return (None, None) if t < 0 or t > 1 else (lp, vp)
 
 def find_poly_line_bounds(mesh, poly_idx, line, eps=1e-5):
 

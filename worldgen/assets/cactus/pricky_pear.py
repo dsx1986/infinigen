@@ -60,8 +60,7 @@ class PrickyPearBaseCactusFactory(BaseCactusFactory):
             leaf.scale = [uniform(.5, .75)] * 3
             leaf.location = locations[index]
             leaf.rotation_euler = 0, a, uniform(-np.pi / 3, np.pi / 3)
-        obj = join_objects([base, *leaves])
-        return obj
+        return join_objects([base, *leaves])
 
     def create_asset(self, face_size=.01, **params) -> bpy.types.Object:
         obj = self.build_leaves(2)

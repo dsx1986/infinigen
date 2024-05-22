@@ -20,15 +20,13 @@ def shader_cracked_ground(nw):
     nw.force_input_consistency()
     crackedground_base_color, crackedground_roughness = geo_cracked_ground(nw, geometry=False)
 
-    principled_bsdf = nw.new_node(
+    return nw.new_node(
         Nodes.PrincipledBSDF,
         input_kwargs={
             "Base Color": crackedground_base_color,
             "Roughness": crackedground_roughness,
         },
     )
-
-    return principled_bsdf
 
 @gin.configurable
 def geo_cracked_ground(nw, selection=None, random_seed=0, geometry=True):
@@ -47,7 +45,7 @@ def geo_cracked_ground(nw, selection=None, random_seed=0, geometry=True):
         per_crac = uniform(-0.25, 0.1)
         # color crack
         col_crac = random_color_neighbour((0.2016, 0.107, 0.0685, 1.0), 0.1, 0.1, 0.1)
-        col_crac = tuple([0.5 * x for x in col_crac[0:3]] + [1])
+        col_crac = tuple([0.5 * x for x in col_crac[:3]] + [1])
         col_crac_node = nw.new_node(Nodes.ColorRamp, label="col_crac")
         col_crac_node.color_ramp.elements.remove(col_crac_node.color_ramp.elements[1])
         col_crac_node.color_ramp.elements[0].color = col_crac
@@ -331,14 +329,13 @@ def geo_cracked_ground(nw, selection=None, random_seed=0, geometry=True):
         crackedground_roughness = colorramp_1
         crackedground_base_color = mix_1
 
-    if geometry:  
-        groupinput = nw.new_node(Nodes.GroupInput)
-        if selection is not None:
-            offset = nw.multiply(offset, surface.eval_argument(nw, selection))
-        set_position = nw.new_node(Nodes.SetPosition, input_kwargs={"Geometry": groupinput,  "Offset": offset})
-        nw.new_node(Nodes.GroupOutput, input_kwargs={'Geometry': set_position})
-    else:
+    if not geometry:
         return crackedground_base_color, crackedground_roughness
+    groupinput = nw.new_node(Nodes.GroupInput)
+    if selection is not None:
+        offset = nw.multiply(offset, surface.eval_argument(nw, selection))
+    set_position = nw.new_node(Nodes.SetPosition, input_kwargs={"Geometry": groupinput,  "Offset": offset})
+    nw.new_node(Nodes.GroupOutput, input_kwargs={'Geometry': set_position})
 
 
 def apply(obj, selection=None, **kwargs):

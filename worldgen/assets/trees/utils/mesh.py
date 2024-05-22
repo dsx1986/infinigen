@@ -19,11 +19,7 @@ def init_mesh(name, verts=[], edges=[], faces=[], coll=None):
   mesh = D.meshes.new(name)
   obj = D.objects.new(mesh.name, mesh)
 
-  if coll is None:
-    coll = bpy.context.scene.collection
-  else:
-    coll = D.collections[coll]
-  
+  coll = bpy.context.scene.collection if coll is None else D.collections[coll]
   coll.objects.link(obj)
   helper.set_active_obj(obj)
 
@@ -164,7 +160,7 @@ def extrude_path(obj, path):
 
 
 def get_vtx_obj():
-  if not 'vtx' in D.objects:
+  if 'vtx' not in D.objects:
     bpy.ops.object.mode_set(mode = 'OBJECT')
     bpy.ops.mesh.primitive_cube_add(size=2, enter_editmode=False, align='WORLD',
                                     location=(0, 0, 0), scale=(1, 1, 1))
@@ -178,11 +174,10 @@ def get_vtx_obj():
 
 
 def subsample_vertices(v, max_num=500):
-  if len(v) > max_num:
-    rand_order = np.random.permutation(len(v))
-    return np.sort(rand_order[:max_num])
-  else:
+  if len(v) <= max_num:
     return np.arange(len(v))
+  rand_order = np.random.permutation(len(v))
+  return np.sort(rand_order[:max_num])
 
 
 def add_ones(x):
@@ -216,8 +211,8 @@ def arr_world_to_camera_view(scene, obj, coord):
   frame = [np.array(v) for v in camera.view_frame(scene=scene)[:3]]
   if camera.type != 'ORTHO':
     frame = [(-v / v[2])[None,:] * z[:,None] for v in frame]
-    for i in range(len(frame)):
-      frame[i][z == 0][:,:2] = .5
+    for item in frame:
+      item[z == 0][:,:2] = .5
 
   min_x, max_x = frame[2][:,0], frame[1][:,0]
   min_y, max_y = frame[1][:,1], frame[0][:,1]

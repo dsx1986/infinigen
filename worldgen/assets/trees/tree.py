@@ -60,8 +60,13 @@ class TreeVertices():
 
 
 def dfs(idx, edges, parents, depth, rev_depth, n_leaves, child_idx):
-    children = [v for v in edges[idx] if v != parents[idx]]
-    if len(children) == 0:
+    if children := [v for v in edges[idx] if v != parents[idx]]:
+        for c in children:
+            parents[c] = idx
+            depth[c] = depth[idx] + 1
+            dfs(c, edges, parents, depth, rev_depth, n_leaves, child_idx)
+
+    else:
         # At leaf, move backwards to update rev_depth
         curr_idx = idx
         child_idx[curr_idx] = -1
@@ -74,12 +79,6 @@ def dfs(idx, edges, parents, depth, rev_depth, n_leaves, child_idx):
             if rev_depth[curr_idx] < curr_depth:
                 child_idx[curr_idx] = prev_idx
                 rev_depth[curr_idx] = curr_depth
-
-    else:
-        for c in children:
-            parents[c] = idx
-            depth[c] = depth[idx] + 1
-            dfs(c, edges, parents, depth, rev_depth, n_leaves, child_idx)
 
 
 def parse_tree_attributes(vtx):
@@ -116,12 +115,12 @@ def parse_tree_attributes(vtx):
             deepest_child_idx = children[child_depths.argmax()]  # we keep this untouched
 
             children_idxs_to_deal = np.setdiff1d(children, np.array([deepest_child_idx]))
+            new_p_depth = 0
+            new_p_n_leaves = 1
             for child_idx_to_deal in children_idxs_to_deal:
                 new_p_pos = vtx_pos[idx]  # len-3
                 new_p_parent = parents[idx]
-                new_p_depth = 0
                 new_p_rev_depth = rev_depth[child_idx_to_deal] + 1
-                new_p_n_leaves = 1
                 new_p_child_idx = child_idx_to_deal
                 new_p_level = levels[idx]
 
@@ -198,21 +197,14 @@ def rand_path(n_pts, sz=1, std=.3, momentum=.5, init_vec=[0, 0, 1], init_pt=[0, 
     path = np.zeros((n_pts, 3))
     path[0] = init_pt
     for i in range(1, n_pts):
-        if i == 1:
-            prev_delta = init_vec * sz
-        else:
-            prev_delta = path[i - 1] - path[i - 2]
-
+        prev_delta = init_vec * sz if i == 1 else path[i - 1] - path[i - 2]
         prev_sz = np.linalg.norm(prev_delta)
         new_delta = prev_delta + np.random.randn(3) * std
         if pull_dir is not None:
             new_delta += pull_factor * pull_dir
         new_delta = (new_delta / np.linalg.norm(new_delta)) * prev_sz
 
-        if decay_mom:
-            tmp_momentum = 1 - (1 - momentum) * (i + 1) / n_pts
-        else:
-            tmp_momentum = momentum
+        tmp_momentum = 1 - (1 - momentum) * (i + 1) / n_pts if decay_mom else momentum
         delta = prev_delta * tmp_momentum + new_delta * (1 - tmp_momentum)
         delta = (delta / np.linalg.norm(delta)) * sz * (sz_decay ** i)
         path[i] = path[i - 1] + delta
@@ -318,7 +310,7 @@ def space_colonization(tree, atts, D=.1, d=10.0, s=.1, pull_dir=None, dir_rand=.
         warnings.warn('Space colonization attractor matching failed, all curr_match == -1')
         return
 
-    for i in range(n_steps):
+    for _ in range(n_steps):
         new_vtxs = []
         new_parents = []
         matched_vtxs = np.unique(curr_match)

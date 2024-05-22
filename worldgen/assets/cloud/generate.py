@@ -61,8 +61,8 @@ class CloudFactory(AssetFactory):
         self.dome_threshold = 32 if self.cloudy else 0
         self.density_range = [1e-5, 1e-4] if self.cloudy else [1e-4, 2e-4]
 
-        self.max_scale = max([t.MAX_EXPECTED_SCALE for t in self.cloud_types])
-        self.density = max([t.PLACEHOLDER_DENSITY for t in self.cloud_types])
+        self.max_scale = max(t.MAX_EXPECTED_SCALE for t in self.cloud_types)
+        self.density = max(t.PLACEHOLDER_DENSITY for t in self.cloud_types)
 
     def spawn_locations(self):
         obj = new_cube()

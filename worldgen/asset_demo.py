@@ -40,8 +40,7 @@ def find_flat_location(
    ang_samples=36
 ):
 
-    for i in trange(retries):
-        
+    for _ in trange(retries):
         ground_loc = copy(np.random.choice(mesh.data.vertices).co)
         origin = ground_loc + Vector((0, 0, alt))
 
@@ -62,7 +61,7 @@ def find_flat_location(
 
         else: # triggered if no `break` statement 
             return ground_loc
-        
+
     raise ValueError(f'Failed to find flat area {retries=}')
 
 def circular_camera_path(camera_rig, target_obj, rad, alt, duration):
@@ -103,7 +102,7 @@ def compose_scene(
 
     if params.get("fancy_clouds", 0):
         kole_clouds.add_kole_clouds()
-    
+
     camera_rigs = cam_util.spawn_camera_rigs()
     cam = cam_util.get_camera(0, 0)
 
@@ -162,9 +161,7 @@ def compose_scene(
         pine_needle.apply(terrain_inview)
         pinecone.apply(terrain_inview)
         rocks.apply(terrain_inview)
-    elif background == 'TODO ADD MORE OPTIONS HERE':
-        pass
-    else:
+    elif background != 'TODO ADD MORE OPTIONS HERE':
         raise ValueError(f'Unrecognized {background=}')
 
 def main():

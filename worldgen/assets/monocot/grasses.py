@@ -44,10 +44,7 @@ class GrassesMonocotFactory(MonocotGrowthFactory):
 
     @staticmethod
     def build_base_hue():
-        if uniform(0, 1) < .6:
-            return uniform(.08, .12)
-        else:
-            return uniform(.2, .25)
+        return uniform(.08, .12) if uniform(0, 1) < .6 else uniform(.2, .25)
 
     def build_leaf(self, face_size):
         x_anchors = np.array([0, uniform(.1, .2), uniform(.5, .7), 1.])
@@ -180,8 +177,7 @@ class ReedEarMonocotFactory(MonocotGrowthFactory):
     def build_leaf(self, face_size):
         x_anchors = np.array([0, uniform(.02, .03), .05])
         y_anchors = np.array([0, uniform(.005, .01), 0])
-        obj = leaf(x_anchors, y_anchors, face_size=face_size)
-        return obj
+        return leaf(x_anchors, y_anchors, face_size=face_size)
 
     def create_asset(self, **params):
         obj = super(ReedEarMonocotFactory, self).create_asset(**params)

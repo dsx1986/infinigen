@@ -536,7 +536,7 @@ def geo_flowerplant(nw: NodeWrangler, **kwargs):
 
     num_versions = randint(0, 3, size=(1,))[0]
     branches = []
-    for version in range(num_versions):
+    for _ in range(num_versions):
         resample_num = randint(80, 100, size=(1,))[0]
         resample_curve_2 = nw.new_node(Nodes.ResampleCurve, input_kwargs={'Curve': set_position, 'Count': resample_num})
         stembranchselection = nw.new_node(nodegroup_stem_branch_selection().name)

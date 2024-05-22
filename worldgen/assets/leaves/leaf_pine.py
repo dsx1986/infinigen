@@ -59,17 +59,16 @@ def apply_needle(obj, selection=None, **kwargs):
 def make_needle(name='Needle'):
     if bpy.context.scene.objects.get(name):
         return bpy.context.scene.objects.get(name)
-    
-    else:
-        bpy.ops.mesh.primitive_plane_add(
-                size=2, enter_editmode=False, align='WORLD', location=(0, 0, 0), scale=(1, 1, 1))
-        needle = bpy.context.active_object
-        needle.name = name
-        apply_needle(needle)
 
-        bpy.ops.object.convert(target='MESH')
+    bpy.ops.mesh.primitive_plane_add(
+            size=2, enter_editmode=False, align='WORLD', location=(0, 0, 0), scale=(1, 1, 1))
+    needle = bpy.context.active_object
+    needle.name = name
+    apply_needle(needle)
 
-        return needle
+    bpy.ops.object.convert(target='MESH')
+
+    return needle
 
 ######## code for creating pine needles ########
 

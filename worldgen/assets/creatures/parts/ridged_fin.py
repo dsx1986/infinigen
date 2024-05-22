@@ -428,12 +428,14 @@ class FishFin(PartFactory):
         self.rig = rig
 
     def sample_params(self):
-        params = {
+        return {
             'FinScale': np.array((1.0, 1.0, 0.5), dtype=np.float32),
             'RoundWeight': sample_range(0, 1),
             'Freq': sample_range(50, 100),
             'OffsetWeightZ': sample_range(0.1, 0.5),
-            'PatternRotation': np.array((4.0 if random.random()<0.5 else -4, 0.0, 2.0), dtype=np.float32),
+            'PatternRotation': np.array(
+                (4.0 if random.random() < 0.5 else -4, 0.0, 2.0), dtype=np.float32
+            ),
             'OffsetWeightY': sample_range(0.5, 1),
             'RoundingWeight': sample_range(0.02, 0.07),
             'AffineX': sample_range(0, 0.3),
@@ -444,9 +446,8 @@ class FishFin(PartFactory):
             'BumpX': 0.0,
             'BumpZ': 1.0,
             'NoiseRatioZ': 1.0,
-            'NoiseRatioX': sample_range(0.9, 0.95)
+            'NoiseRatioX': sample_range(0.9, 0.95),
         }
-        return params
 
     def make_part(self, params):
 

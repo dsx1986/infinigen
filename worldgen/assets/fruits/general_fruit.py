@@ -104,7 +104,7 @@ def general_fruit_geometry_nodes(nw: NodeWrangler,
         input_kwargs={'Geometry': realize_instances})
 
     output_dict = {'Geometry': align}
-    output_dict.update(cross_section_params['cross_section_output_args'])
+    output_dict |= cross_section_params['cross_section_output_args']
     output_dict.update(shape_params['shape_output_args'])
     output_dict.update(surface_params['surface_output_args'])
     output_dict.update(stem_params['stem_output_args'])
@@ -169,7 +169,7 @@ class FruitFactoryGeneralFruit(AssetFactory):
         obj.scale *= normal(1, 0.1) * self.scale * scale_multiplier
         butil.apply_transform(obj)
 
-        tag_object(obj, 'fruit_'+self.name)
+        tag_object(obj, f'fruit_{self.name}')
         return obj
 
 

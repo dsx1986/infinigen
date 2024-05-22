@@ -84,7 +84,7 @@ def herbivore_genome():
 
     temp_dict = defaultdict(lambda: 0.2, {'body_herbivore_giraffe': 0.02, 'body_herbivore_llama': 0.1})
     body = genome.part(parts.generic_nurbs.NurbsBody(prefix='body_herbivore', tags=['body'], var=1, temperature=temp_dict))
- 
+
     neck_t = 0.67
     shoulder_bounds = np.array([[-20, -20, -20], [20, 20, 20]])
     splay = clip_gaussian(130, 7, 90, 130)/180
@@ -179,10 +179,8 @@ def herbivore_genome():
     return genome.CreatureGenome(
         parts=body,
         postprocess_params=dict(
-            animation=dict(),
-            hair=hair,
-            surface_registry=registry
-        ) 
+            animation={}, hair=hair, surface_registry=registry
+        ),
     )
 
 @gin.configurable

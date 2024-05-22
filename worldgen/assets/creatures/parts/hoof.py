@@ -121,15 +121,14 @@ class HoofClaw(PartFactory):
     tags = ['head_detail', 'rigid']
 
     def sample_params(self, select=None, var=1):
-        params = {
+        return {
             'n': 20,
-            'm': 20, 
+            'm': 20,
             'sx': 0.1 * N(1, 0.05),
             'sy': 0.1 * N(1, 0.05),
             'sz': 0.08 * N(1, 0.05),
-            'r': 0.5 + N(0, 1)
+            'r': 0.5 + N(0, 1),
         }
-        return params
 
     def make_part(self, params):
         obj = butil.spawn_vert('hoofclaw_parent_temp')
@@ -178,15 +177,18 @@ class HoofAnkle(PartFactory):
     ankle_scale = (0.8, 0.8, 0.8)
 
     def sample_params(self, var=1):
-        ankle = {
-            'length_rad1_rad2': (0.45 * N(1, 0.05), 0.07 * N(1, 0.05), 0.1 * N(1, 0.05)),
+        return {
+            'length_rad1_rad2': (
+                0.45 * N(1, 0.05),
+                0.07 * N(1, 0.05),
+                0.1 * N(1, 0.05),
+            ),
             'angles_deg': (-90.0 + N(0, 5), 40.0 + N(0, 5), N(0, 5)),
             'aspect': 1.0,
             'Upper Rad1 Rad2 Fullness': (0.2, 0.0, 4),
             'Lower Rad1 Rad2 Fullness': (0.15, 0.0, 4),
-            'Height, Tilt1, Tilt2': (1, 0.0, 0.0)
+            'Height, Tilt1, Tilt2': (1, 0.0, 0.0),
         }
-        return ankle
 
     def make_part(self, params):
         obj = butil.spawn_vert('hoof_parent_temp')

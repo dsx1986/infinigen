@@ -55,7 +55,11 @@ class FallenTreeFactory(BaseDeformedTreeFactory):
 
     def create_asset(self, face_size, **params):
         upper = self.build_tree(face_size, **params)
-        radius = max([np.sqrt(v.co[0] ** 2 + v.co[1] ** 2) for v in upper.data.vertices if v.co[-1] < .1])
+        radius = max(
+            np.sqrt(v.co[0] ** 2 + v.co[1] ** 2)
+            for v in upper.data.vertices
+            if v.co[-1] < 0.1
+        )
         self.trunk_surface.apply(upper)
         butil.apply_modifiers(upper)
         lower = deep_clone_obj(upper, keep_materials=True)

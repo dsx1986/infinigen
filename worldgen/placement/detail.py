@@ -121,8 +121,11 @@ def merged_by_distance_col(col, face_size, inplace=False):
     if not inplace:
         with butil.SelectObjects(list(col.objects)):
             bpy.ops.object.duplicate()
-            col = butil.group_in_collection(list(bpy.context.selected_objects),
-                                            name=col.name + f'.detail({face_size:.5f})', reuse=False)
+            col = butil.group_in_collection(
+                list(bpy.context.selected_objects),
+                name=f'{col.name}.detail({face_size:.5f})',
+                reuse=False,
+            )
 
     for obj in col.objects:
         butil.merge_by_distance(obj, face_size)
@@ -140,7 +143,7 @@ def min_max_edgelen(mesh):
 def adapt_mesh_resolution(obj, face_size, method, approx=0.2, **kwargs):
     
     assert obj.type == 'MESH'
-    assert 0 <= approx and approx <= 0.5
+    assert 0 <= approx <= 0.5
 
     logger.debug(f'adapt_mesh_resolution on {obj.name} with {method=} to {face_size=:.6f}')
 

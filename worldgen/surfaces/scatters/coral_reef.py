@@ -24,7 +24,7 @@ def apply(obj, scale=1, density=5., n=12, selection=None, horizontal=False, **kw
 
 def apply_all(obj, scale=1, density=5., n=12, selection=None):
     n_species = np.random.randint(5, 10)
-    factories = [CoralFactory(np.random.randint(1e7)) for i in range(n_species)]
+    factories = [CoralFactory(np.random.randint(1e7)) for _ in range(n_species)]
     corals = make_asset_collection(factories, name='coral', weights=U(0.8, 1, len(factories)), n=n)
 
     scatter_obj = scatter_instances(

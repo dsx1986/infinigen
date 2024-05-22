@@ -32,7 +32,7 @@ def bone(editbones, head, tail, parent):
 
 
 def get_bone_idxs(part):
-    idxs = set([0.0, 1.0])
+    idxs = {0.0, 1.0}
     if part.joints is not None:
         idxs = idxs.union(part.joints.keys())
     return sorted(list(idxs))
@@ -62,7 +62,7 @@ def create_part_bones(part: Part, editbones, parent):
             head = mutil.lerp_sample(skeleton, 0 * (len(skeleton) - 1)).reshape(-1)
             tail = mutil.lerp_sample(skeleton, 1 * (len(skeleton) - 1)).reshape(-1)
 
-            extra_id = re.fullmatch('.*\.extra\((.*),.*', extra.name).group(1)
+            extra_id = re.fullmatch('.*\.extra\((.*),.*', extra.name)[1]
             bones[extra_id] = bone(editbones, head, tail, parent)
 
     return bones
@@ -210,7 +210,7 @@ def apply_joint_constraint(joint: Joint, pose_bone, eps=1e-2):
     if joint.bounds is not None:
         bounds = np.deg2rad(joint.bounds)
 
-        if not bounds.shape == (2, 3):
+        if bounds.shape != (2, 3):
             raise ValueError(f'Encountered invalid {joint.bounds=}, {joint.bounds.shape=}')
 
         ranges = bounds[1] - bounds[0]
@@ -331,17 +331,13 @@ def creature_rig(root, genome, parts, constraints=True):
 
 def create_ragdoll(root, arma, min_col_length=0.1, col_joint_margin=0.2, col_radius=0.07):
     def include_bone(b):
-        if '-1' in b.name:
-            return False
-        if (b.head - b.tail).length < min_col_length:
-            return False
-        return True
+        return False if '-1' in b.name else (b.head - b.tail).length >= min_col_length
 
     def create_bone_collider(pbone):
         col_head = mutil.lerp(pbone.head, pbone.tail, col_joint_margin)
         col_tail = mutil.lerp(pbone.head, pbone.tail, 1 - col_joint_margin)
 
-        col = butil.spawn_line(pbone.name + '.col', np.array([col_head, col_tail]))
+        col = butil.spawn_line(f'{pbone.name}.col', np.array([col_head, col_tail]))
         with butil.SelectObjects(col), butil.CursorLocation(col_head):
             bpy.ops.object.origin_set(type='ORIGIN_CURSOR', center='MEDIAN')
 
@@ -360,7 +356,7 @@ def create_ragdoll(root, arma, min_col_length=0.1, col_joint_margin=0.2, col_rad
         return col
 
     def configure_rigidbody_joint(child_bone, child_obj, parent_obj):
-        o = butil.spawn_empty(child_bone.name + '.phys_joint')
+        o = butil.spawn_empty(f'{child_bone.name}.phys_joint')
         o.location = child_bone.head
 
         with butil.SelectObjects(o):

@@ -2413,15 +2413,14 @@ class Eye(PartFactory):
         }
 
     def make_part(self, params):
-        part = part_util.nodegroup_to_part(nodegroup_eyeball_eyelid, params)
-        return part
+        return part_util.nodegroup_to_part(nodegroup_eyeball_eyelid, params)
 
 def apply(obj, geo_kwargs=None, shader_kwargs=None, **kwargs):
     surface.add_geomod(obj, geometry_tiger_head, apply=False, input_kwargs=geo_kwargs)
     
 if __name__ == "__main__":
     mat = 'tigereye'
-    for i in range(1):
+    for _ in range(1):
         bpy.ops.wm.open_mainfile(filepath='test.blend')
         apply(bpy.data.objects['SolidModel'], geo_kwargs={}, shader_kwargs={})
         fn = os.path.join(os.path.abspath(os.curdir), 'tigereye_test.blend')

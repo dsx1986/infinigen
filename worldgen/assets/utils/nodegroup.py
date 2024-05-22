@@ -35,11 +35,13 @@ def build_curve(nw: NodeWrangler, positions, circular=False, handle='VECTOR'):
             'Mesh': nw.new_node(Nodes.MeshLine, input_kwargs={'Count': length}, attrs={'mode': 'END_POINTS'})
         })
 
-    curve = nw.new_node(Nodes.SetPosition, input_kwargs={
-        'Geometry': base_curve,
-        'Position': nw.new_node(Nodes.CombineXYZ, transferred_positions)
-    })
-    return curve
+    return nw.new_node(
+        Nodes.SetPosition,
+        input_kwargs={
+            'Geometry': base_curve,
+            'Position': nw.new_node(Nodes.CombineXYZ, transferred_positions),
+        },
+    )
 
 
 def geo_radius(nw: NodeWrangler, radius, resolution=6, merge_distance=.004):

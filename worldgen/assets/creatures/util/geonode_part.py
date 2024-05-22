@@ -22,7 +22,7 @@ def extract_nodegroup_geo(target_obj, nodegroup, k, ng_params=None):
     vert = butil.spawn_vert('extract_nodegroup_geo.temp')
 
     butil.modify_mesh(vert, type='NODES', apply=False)
-    if vert.modifiers[0].node_group == None:
+    if vert.modifiers[0].node_group is None:
         group = geometry_node_group_empty_new()
         vert.modifiers[0].node_group = group
     ng = vert.modifiers[0].node_group
@@ -74,7 +74,7 @@ class GeonodePartFactory:
         return results
 
     def __call__(self):
-    
+
         objs = self._extract_geo_results()
 
         skin_obj = objs.pop('Geometry')
@@ -92,7 +92,7 @@ class GeonodePartFactory:
         # Handle any 'Extras' exported by the nodegroup
         for k, o in objs.items():
             o.name = k
-            o.mesh.name = k + '.mesh'
+            o.mesh.name = f'{k}.mesh'
             o.parent = skin_obj
 
         return Part(

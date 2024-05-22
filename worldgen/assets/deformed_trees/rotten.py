@@ -56,7 +56,11 @@ class RottenTreeFactory(BaseDeformedTreeFactory):
 
     def create_asset(self, face_size, **params):
         outer = self.build_tree(face_size, **params)
-        radius = max([np.sqrt(v.co[0] ** 2 + v.co[1] ** 2) for v in outer.data.vertices if v.co[-1] < .1])
+        radius = max(
+            np.sqrt(v.co[0] ** 2 + v.co[1] ** 2)
+            for v in outer.data.vertices
+            if v.co[-1] < 0.1
+        )
         height = uniform(.8, 1.6)
         cutter, fn, inverse_fn, metric_fn = self.build_cutter(radius, height)
         butil.modify_mesh(outer, 'BOOLEAN', object=cutter, operation='DIFFERENCE')

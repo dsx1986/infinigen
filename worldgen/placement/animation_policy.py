@@ -47,9 +47,9 @@ def walk_same_altitude(start_loc, sampler, bvh, filter_func=None, fall_ratio=1.5
         pos.z += 1 # move it up a ways, so that it can raycast back down onto something
         curr_alt = get_altitude(start_loc, bvh)
         new_alt = get_altitude(pos, bvh)
-        if curr_alt is None or new_alt is None:
-            if curr_alt is None:
-                raise PolicyError()
+        if curr_alt is None:
+            raise PolicyError()
+        elif new_alt is None:
             logger.debug(f'walk_same_altitude failed {retry=} with {curr_alt=}, {new_alt=}')
             continue
 
@@ -57,7 +57,7 @@ def walk_same_altitude(start_loc, sampler, bvh, filter_func=None, fall_ratio=1.5
         max_fall_dist = step_up_height + fall_ratio * (pos - start_loc).length
         fall_dist = np.clip(fall_dist, -100, max_fall_dist)
 
-        pos.z = pos.z - fall_dist
+        pos.z -= fall_dist
 
         if filter_func is not None and not filter_func(pos):
             continue
@@ -252,12 +252,11 @@ class AnimPolicyFollowObject:
         try:
             ts = []
             for fc in self.follow_obj.animation_data.action.fcurves:
-                for kp in fc.keyframe_points:
-                    ts.append(int(kp.co[0]))
+                ts.extend(int(kp.co[0]) for kp in fc.keyframe_points)
             frame_next = min(t for t in ts if t > frame_curr)
         except (ValueError, AttributeError): # no next frame, or no animation_data.action
             frame_next = frame_curr + bpy.context.scene.render.fps
-        
+
         time = (frame_next - frame_curr) / bpy.context.scene.render.fps
 
         bpy.context.scene.frame_set(frame_curr)
@@ -406,7 +405,7 @@ def animate_trajectory(
             for k in fc.keyframe_points:
                 if k.co[0] == t:
                     k.interpolation = interp
-    
+
     obj_orig_loc = copy(obj.location)
     obj_orig_rot = copy(obj.rotation_euler)
 
@@ -452,9 +451,8 @@ def animate_trajectory(
         err = f'Animation for {obj.name=} failed with {max_full_retries=} and {max_step_tries=}, quitting'
         if fatal:
             raise ValueError(err)
-        else:
-            logger.warning(err)
-            return
+        logger.warning(err)
+        return
     
 def policy_create_bezier_path(start_pose_obj, bvh, policy_func, to_mesh=False, eval_offset=(0,0,0), **kwargs):
     

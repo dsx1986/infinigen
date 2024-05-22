@@ -22,7 +22,7 @@ class AutoTag():
         tags.sort()
         name = tags[0]
         for i in range(1, len(tags)):
-            name = name + '.' + tags[i]
+            name = f'{name}.{tags[i]}'
         return name
 
     def trigger_update(self):
@@ -80,7 +80,7 @@ class AutoTag():
         for obj in objs:
             if obj.type != 'MESH':
                 continue
-            
+
             attr_dict = {}
             n = 0
             tag = None
@@ -96,10 +96,10 @@ class AutoTag():
                     tag = n * [0]
                     attr.data.foreach_get('value', tag)
 
-            for name in attr_dict.keys():
-                obj.data.attributes.remove(obj.data.attributes['TAG_' + name])
-            
-            assert (len(attr_dict) > 0) or (tag is not None), 'No tag for object {}'.format(obj.name)
+            for name in attr_dict:
+                obj.data.attributes.remove(obj.data.attributes[f'TAG_{name}'])
+
+            assert attr_dict or tag is not None, f'No tag for object {obj.name}'
 
             MaskTag = [0] * n
             for i in range(n):
@@ -108,10 +108,7 @@ class AutoTag():
                     TagName = tag_name[tag[i] - 1]
                 for name, val in attr_dict.items():
                     if val[i] == True:
-                        if TagName is None:
-                            TagName = name
-                        else:
-                            TagName = TagName + '.' + name
+                        TagName = name if TagName is None else f'{TagName}.{name}'
                 TagName = self.rephrase(TagName)
                 TagValue = tag_dict.get(TagName, -1)
                 if TagValue == -1:
@@ -119,7 +116,7 @@ class AutoTag():
                     tag_dict[TagName] = TagValue
                     tag_name.append(TagName)
                 MaskTag[i] = TagValue
-            
+
             if tag is None:
                 MaskTag_attr = self.add_attribute(obj.name, 'MaskTag', type='INT', value=1, recursive=False)
             else:
@@ -135,15 +132,16 @@ tag_system = AutoTag()
 
 def tag_object(obj, name=""):
     if name != "":
-        name = 'TAG_' + name
+        name = f'TAG_{name}'
         tag_system.add_attribute(obj.name, name, type='BOOLEAN', value=True)
     tag_system.relabel_obj(obj)
 
 
 def tag_nodegroup(nw, input_node, name):
-    name = 'TAG_' + name
-    store_named_attribute = nw.new_node(Nodes.StoreNamedAttribute,
+    name = f'TAG_{name}'
+    return nw.new_node(
+        Nodes.StoreNamedAttribute,
         input_kwargs={'Geometry': input_node, 'Name': name, 5: True},
-        attrs={'domain': 'POINT', 'data_type': 'BOOLEAN'})
-    return store_named_attribute
+        attrs={'domain': 'POINT', 'data_type': 'BOOLEAN'},
+    )
     

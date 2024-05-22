@@ -107,8 +107,8 @@ class ElkhornBaseCoralFactory(BaseCoralFactory):
             while queue:
                 new_queue = set()
                 for v in queue:
-                    pairs = []
                     if angles[v.index] <= -100.:
+                        pairs = []
                         for e in v.link_edges:
                             o = e.other_vert(v)
                             if angles[o.index] > -100.:
@@ -136,10 +136,7 @@ class ElkhornBaseCoralFactory(BaseCoralFactory):
         write_co(obj, co)
         with butil.ViewportMode(obj, 'EDIT'):
             bm = bmesh.from_edit_mesh(obj.data)
-            geom = []
-            for e in bm.edges:
-                if e.calc_length() > .04:
-                    geom.append(e)
+            geom = [e for e in bm.edges if e.calc_length() > .04]
             bmesh.ops.delete(bm, geom=geom, context='EDGES')
             bmesh.update_edit_mesh(obj.data)
         return obj

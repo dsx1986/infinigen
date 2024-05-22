@@ -19,6 +19,7 @@
 7. You should see one python function printed for each material/geonodes on your object
 '''
 
+
 import os
 import sys
 import importlib
@@ -55,12 +56,7 @@ elif target == 'world':
 else:
     raise ValueError(f'Unrecognized {target=}')
 
-if mode == 'print':
-    print('START')
-    print('\n')
-    print(res)
-    print('END')
-elif mode == 'make_script':
+if mode == 'make_script':
     res_debug = (
         "import bpy\n" +
         res +
@@ -68,8 +64,12 @@ elif mode == 'make_script':
     )
     script = bpy.data.texts.new('generated_surface_script')
     script.from_string(res_debug)
+elif mode == 'print':
+    print('START')
+    print('\n')
+    print(res)
+    print('END')
 elif mode == 'write_file':
-    
     filename = 'generated_surface_script.py'
     print(f'Writing generated script to {filename}')
     with Path(filename).open('w') as f:

@@ -15,7 +15,9 @@ from placement.instance_scatter import scatter_instances
 
 def apply(obj, scale=1, density=1., n=10, selection=None):
     n_species = np.random.randint(2, 3)
-    factories = list(JellyfishFactory(np.random.randint(1e5)) for i in range(n_species))
+    factories = [
+        JellyfishFactory(np.random.randint(1e5)) for i in range(n_species)
+    ]
     jellyfish = make_asset_collection(factories, name='jellyfish',
                                                  weights=np.random.uniform(0.5, 1, len(factories)), n=n,
                                                  verbose=True)

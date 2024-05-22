@@ -80,7 +80,7 @@ def default_profile_angles(m):
 
 def compute_profile_verts(skeleton, ts, profiles, angles=None, profile_as_points=False):
 
-    n, m = profiles.shape[0:2]
+    n, m = profiles.shape[:2]
     k = len(skeleton)
 
     # default angles point index 0 to -z by convention
@@ -89,12 +89,12 @@ def compute_profile_verts(skeleton, ts, profiles, angles=None, profile_as_points
 
     # decide the axes of rotation for each integer distance along the skeleton
     axes = skeleton_to_tangents(skeleton)
-    
+
     # user gives t in [0, 1] representing percent of distance along skeleton
     #ts = dist_pcts_to_ts(skeleton, ts)
     axes = lerp_sample(axes, ts * (k - 1))
     pos = lerp_sample(skeleton, ts * (k - 1))
-    
+
     # compute profile shapes
     if profile_as_points:
         assert(profiles.shape[2]==3)

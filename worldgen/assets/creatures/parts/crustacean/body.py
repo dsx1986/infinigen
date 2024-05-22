@@ -98,9 +98,21 @@ class CrabBodyFactory(PartFactory):
         displace_vertices(obj, lambda x, y, z: (
             0, 0, (1 if prefix == 'upper' else -1) * height_scale(distance) * params[f'{prefix}_z']))
         displace_vertices(obj, lambda x, y, z: (params[f'{prefix}_shift'] * z, 0, 0))
-        offset = lambda nw, vector, distance: nw.combine(0, 0, nw.scalar_multiply(distance, nw.scalar_multiply(
-            nw.new_node(Nodes.MusgraveTexture, [vector], input_kwargs={'Scale': params['noise_scale']
-            }), params[f'noise_strength'])))
+        offset = lambda nw, vector, distance: nw.combine(
+            0,
+            0,
+            nw.scalar_multiply(
+                distance,
+                nw.scalar_multiply(
+                    nw.new_node(
+                        Nodes.MusgraveTexture,
+                        [vector],
+                        input_kwargs={'Scale': params['noise_scale']},
+                    ),
+                    params['noise_strength'],
+                ),
+            ),
+        )
         surface.add_geomod(obj, geo_symmetric_texture, input_args=[offset], apply=True)
         return obj
 
@@ -229,9 +241,17 @@ class LobsterBodyFactory(CrabBodyFactory):
         obj.scale[-1] = z_length / y_length
         butil.apply_transform(obj)
 
-        offset = lambda nw, vector: nw.scale(nw.scalar_multiply(
-            nw.new_node(Nodes.MusgraveTexture, [vector], input_kwargs={'Scale': params['noise_scale']
-            }), params[f'noise_strength']), nw.new_node(Nodes.InputNormal))
+        offset = lambda nw, vector: nw.scale(
+            nw.scalar_multiply(
+                nw.new_node(
+                    Nodes.MusgraveTexture,
+                    [vector],
+                    input_kwargs={'Scale': params['noise_scale']},
+                ),
+                params['noise_strength'],
+            ),
+            nw.new_node(Nodes.InputNormal),
+        )
         surface.add_geomod(obj, geo_symmetric_texture, input_args=[offset], apply=True)
 
         n_segments = 4

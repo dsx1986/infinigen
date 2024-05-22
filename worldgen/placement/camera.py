@@ -338,8 +338,7 @@ def compute_base_views(
     potential_views = []
     n_min_candidates = int(min_candidates_ratio * n_views)
     with tqdm(total=n_min_candidates, desc='Searching for camera viewpoints') as pbar:
-        for it in range(1, max_tries):
-
+        for _ in range(1, max_tries):
             props = camera_pose_proposal(terrain_bvh=terrain_bvh, terrain_bbox=terrain_bbox)
             if props is None: continue
             loc, rot = props
@@ -374,10 +373,10 @@ def camera_selection_preprocessing(
     terrain, terrain_tags_ratio={},
 ):
 
-    with Timer(f'Building terrain BVHTree'):
+    with Timer('Building terrain BVHTree'):
         terrain_bvh, terrain_tags_answers, vertexwise_min_dist = terrain.build_terrain_bvh_and_attrs(terrain_tags_ratio.keys())
 
-    with Timer(f'Building placeholders KDTree'):
+    with Timer('Building placeholders KDTree'):
         placeholders_kd = placement.placeholder_kd()
 
     return dict(
@@ -411,7 +410,7 @@ def configure_cameras(
 
         if focus_dist is not None:
             for cam in cam_rig.children:
-                if not cam.type =='CAMERA': continue
+                if cam.type != 'CAMERA': continue
                 cam.data.dof.focus_distance = focus_dist
 
     butil.delete(dummy_camera)
@@ -476,7 +475,6 @@ def ng_dist2camera(nw: NodeWrangler):
 
 
 def get_camera_trajectory():
-    current_frame = bpy.context.scene.frame_current
     if 'Cameras' in bpy.data.collections:
         locations = []
         for camera_pair in bpy.data.collections['Cameras'].children:
@@ -486,6 +484,7 @@ def get_camera_trajectory():
                         fr = int(k.co[0])
                         bpy.context.scene.frame_set(fr)
                         locations.append(camera.location)
+        current_frame = bpy.context.scene.frame_current
         bpy.context.scene.frame_set(current_frame)
     else:
         locations = [[100] * 3]
@@ -533,4 +532,4 @@ if __name__ == "__main__":
             depth_output[H-y-1,x] = dist - dist_diff
 
     color_depth = depth_to_jet(depth_output)
-    imageio.imwrite(f"color_depth.png", color_depth)
+    imageio.imwrite("color_depth.png", color_depth)

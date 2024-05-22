@@ -231,7 +231,7 @@ def add_distance_to_boundary(obj):
         bm = bmesh.from_edit_mesh(obj.data)
         bm.verts.ensure_lookup_table()
         distance = np.full(len(obj.data.vertices), -100.)
-        queue = set(v.index for v in bm.verts if v.select)
+        queue = {v.index for v in bm.verts if v.select}
         d = 0
         while True:
             distance[list(queue)] = d
@@ -240,7 +240,7 @@ def add_distance_to_boundary(obj):
                 v = bm.verts[i]
                 for e in v.link_edges:
                     next_queue.add(e.other_vert(v).index)
-            queue = set(i for i in next_queue if distance[i] < 0)
+            queue = {i for i in next_queue if distance[i] < 0}
             if not queue:
                 break
             d += 1

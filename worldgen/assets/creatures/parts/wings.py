@@ -279,8 +279,7 @@ class BirdTail(PartFactory):
         }
 
     def make_part(self, params):
-        part = nodegroup_to_part(nodegroup_bird_tail, params)
-        return part
+        return nodegroup_to_part(nodegroup_bird_tail, params)
 
 class BirdWing(PartFactory):
 
@@ -639,8 +638,7 @@ class FlyingBirdTail(PartFactory):
         }
 
     def make_part(self, params):
-        part = nodegroup_to_part(nodegroup_flying_bird_tail, params)
-        return part
+        return nodegroup_to_part(nodegroup_flying_bird_tail, params)
 
 
 class FlyingBirdWing(PartFactory):

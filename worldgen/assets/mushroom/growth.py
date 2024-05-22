@@ -32,10 +32,7 @@ class MushroomGrowthFactory(AssetFactory):
 
     @staticmethod
     def build_base_hue():
-        if uniform(0, 1) < .4:
-            return uniform(0, 1)
-        else:
-            return uniform(.02, .15)
+        return uniform(0, 1) if uniform(0, 1) < .4 else uniform(.02, .15)
 
     def create_asset(self, **params):
         cap = self.cap_factory(**params)

@@ -125,12 +125,22 @@ class SnailBaseFactory(BaseMolluskFactory):
     @staticmethod
     def geo_affine(nw: NodeWrangler):
         geometry = nw.new_node(Nodes.GroupInput, expose_input=[('NodeSocketGeometry', 'Geometry', None)])
-        affine = nw.new_node(Nodes.SetPosition, input_kwargs={
-            'Geometry': geometry,
-            'Offset': nw.combine(
-                *[nw.vector_math('DOT_PRODUCT', uniform(-.1, .1, 3), nw.new_node(Nodes.InputPosition)) for _ in
-                    range(3)])})
-        return affine
+        return nw.new_node(
+            Nodes.SetPosition,
+            input_kwargs={
+                'Geometry': geometry,
+                'Offset': nw.combine(
+                    *[
+                        nw.vector_math(
+                            'DOT_PRODUCT',
+                            uniform(-0.1, 0.1, 3),
+                            nw.new_node(Nodes.InputPosition),
+                        )
+                        for _ in range(3)
+                    ]
+                ),
+            },
+        )
 
     def create_asset(self, **params):
         obj = self.maker()

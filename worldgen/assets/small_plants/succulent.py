@@ -414,8 +414,7 @@ class SucculentFactory(AssetFactory):
 
     def get_params(self, mode):
         if mode == 'thin_pedal':
-            params = {}
-            params["cross_y_bottom"] = uniform(0.08, 0.25)
+            params = {"cross_y_bottom": uniform(0.08, 0.25)}
             params["cross_y_top"] = uniform(-0.04, 0.02)
             params["cross_x"] = uniform(0.3, 0.6)
             # get geometry params on each base
@@ -462,8 +461,7 @@ class SucculentFactory(AssetFactory):
             return params
 
         elif mode == 'thick_pedal':
-            params = {}
-            params["cross_y_bottom"] = uniform(0.22, 0.30)
+            params = {"cross_y_bottom": uniform(0.22, 0.30)}
             params["cross_y_top"] = uniform(0.08, 0.15)
             params["cross_x"] = uniform(0.14, 0.16)
             # get geometry params on each base

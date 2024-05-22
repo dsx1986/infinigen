@@ -119,5 +119,4 @@ def profile_from_thickened_curve(curve_skeleton: np.array, # Nx3, with x axis as
     left_points = curve_skeleton + left_offset
     right_points = curve_skeleton - left_offset
 
-    profile = np.concatenate([left_points, right_points[::-1]]) 
-    return profile 
+    return np.concatenate([left_points, right_points[::-1]]) 
